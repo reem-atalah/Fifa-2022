@@ -30,7 +30,10 @@ app.use(fileUpload()); //to upload files/pictures
 
 app.get('/', (req, res) => {
     
-    return res.redirect('signup');
+    // show t.html
+    res.render('    t');
+
+    // return res.redirect('signup');
 });
 
 //flash messages middleware
@@ -49,7 +52,6 @@ app.use((req, res, next) => {
 // app.use('/home', require('./routes/home'));
 app.use('/login', require('./routes/login'));
 app.use('/signup', require('./routes/signup'));
- 
 
 global.global_username = "";
 global.global_type = "";
