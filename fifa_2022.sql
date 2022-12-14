@@ -3,6 +3,11 @@ DROP DATABASE IF EXISTS FIFA_2022;
 CREATE DATABASE FIFA_2022;
 USE FIFA_2022;
 
+
+/* Tables for Teams? 
+    - Check that Team can't have two matches Same time!
+*/
+
 create table IF NOT exists Users
 (
     ID int not null auto_increment,
@@ -70,3 +75,15 @@ INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Pass
 Values('ahmed', 'Ahmed', 'Ali', 'ahmed@gmail.com', '1999-01-01', 'Male', '123456', 'Saudi', 3);
 
 select * from Users;
+
+-- Stadiums
+INSERT INTO Stadiums (Name, NumRows, NumSeatsPerRow)
+VALUES ('S1', 10, 10);
+
+INSERT INTO Stadiums (Name, NumRows, NumSeatsPerRow)
+VALUES ('S2', 5, 15);
+
+-- MATCHES
+INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
+VALUES (1, '2022-01-01 12:00:00', 'Egypt', 'Saudi', 'Ahmed', 'Ali', 'Mohamed');
+

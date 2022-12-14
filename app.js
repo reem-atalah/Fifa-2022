@@ -51,6 +51,7 @@ app.use((req, res, next) => {
 // app.use('/home', require('./routes/home'));
 app.use('/login', require('./routes/login'));
 app.use('/register', require('./routes/register'));
+app.use('/matches', require('./routes/matches'));
 
 global.global_username = "";
 global.global_type = "";
