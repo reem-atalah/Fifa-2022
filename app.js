@@ -30,8 +30,7 @@ app.use(fileUpload()); //to upload files/pictures
 
 app.get('/', (req, res) => {
     
-    // show t.html
-    res.render('    t');
+    res.render('t');
 
     // return res.redirect('signup');
 });
@@ -51,7 +50,7 @@ app.use((req, res, next) => {
 
 // app.use('/home', require('./routes/home'));
 app.use('/login', require('./routes/login'));
-app.use('/signup', require('./routes/signup'));
+app.use('/register', require('./routes/register'));
 
 global.global_username = "";
 global.global_type = "";
