@@ -1,43 +1,72 @@
+DROP DATABASE IF EXISTS FIFA_2022;
+
 CREATE DATABASE FIFA_2022;
 USE FIFA_2022;
-create table IF NOT exists User
+
+create table IF NOT exists Users
 (
-Fname varchar(50) not null,
-Lname varchar(50) not null,
-primary key (Username),
-Password varchar(50),
-Email varchar(50),
-Username varchar(50) not null,
-Gender varchar(6),
-Nationality varchar(50),
-Birthdate date,
-Role varchar(1),  -- 2 for admin, 1 for Manager, 0 for Fan --
-manager boolean -- wanted to be manager: null: he didn't choose to be a manager, 
--- 0: asked to be manager but not approved yet, 1: now he's manager--
+    ID int not null auto_increment,
+    primary key (ID),
+    Username varchar(50) not null unique,
+    FirstName varchar(50) not null,
+    LastName varchar(50) not null,
+    Email varchar(50),
+    BirthDate date,
+    Gender varchar(6),
+    Password varchar(50) not null,
+    Nationality varchar(50),
+    Role varchar(1) not null  -- 0 for admin, 1 for Manager, 2 for Fan Who Wants Managment, 3 for Fan
+);
+
+CREATE TABLE IF NOT EXISTS Stadiums
+(
+    ID int not null auto_increment,
+    primary key (ID),
+    Name varchar(50) not null,
+    NumRows int not null,
+    NumSeatsPerRow int not null
 );
 
 create table IF NOT exists Matches
 (
-MatchID int not null,
-MatchDate date,
-MatchTime time,
-primary key (MatchID)
+    ID int not null auto_increment,
+    primary key (ID),
+    StadiumID int not null,
+    foreign key (StadiumID) references Stadiums(ID),
+    Time datetime not null,
+    Team1 varchar(50) not null,
+    Team2 varchar(50) not null,
+    Referee varchar(50) not null,
+    Linesman1 varchar(50) not null,
+    Linesman2 varchar(50) not null
+);
 
+CREATE TABLE IF NOT EXISTS Reserve
+(
+    UserID int not null,
+    foreign key (UserID) references Users(ID),
+    MatchID int not null,
+    foreign key (MatchID) references Matches(ID),
+    SeatNo int not null,
+    TicketID int not null
 );
 
 /*Insert Records*/
 
 -- IT Adminstrators -- 
-INSERT INTO User  VALUES ("Medhat","Nabel","999879","Nabel@gmail.com","mdehat","Male","Egyptian","1999-01-01",2,null);                                 
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+VALUES ("medhat", "Medhat", "Nabel", "Nabel@gmail.com", "1999-01-01", "Male", "999879", "Egyptian", 0);                                 
 
 -- managers --
-insert  into User values ('ola','adel','123456',"ola11@gmail.com",'ola', "Female" , "Palestinian","1999-01-01", 1,1);
-
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+Values('ola', 'ola', 'adel', 'ola11@gmail.com', '1999-01-01', 'Female', '123456', 'Palestinian', 1);
 
 -- Fan want to be a manager --
-insert  into User values ('Amira','Ahmed','123456',"amiraaa@gmail.com",'amira', "Female" , "Yemeni","1999-01-01", 0,0);
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+Values('amira', 'Amira', 'Ahmed', 'amiraaa@gmail.com', '1999-01-01', 'Female', '123456', 'Yemeni', 2);
 
---- Fan --
-insert  into User values ('Ahmed','Ali','123456',"ahmed@gmail.com",'ahmed', "Male","Saudi","1999-01-01",0,null);
+-- Fan --
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+Values('ahmed', 'Ahmed', 'Ali', 'ahmed@gmail.com', '1999-01-01', 'Male', '123456', 'Saudi', 3);
 
-select * from User;
+select * from Users;
