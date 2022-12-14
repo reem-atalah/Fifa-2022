@@ -15,9 +15,7 @@ create table IF NOT exists Users
     Gender varchar(6),
     Password varchar(50) not null,
     Nationality varchar(50),
-    Role varchar(1) not null,  -- 2 for admin, 1 for Manager, 0 for Fan --
-    Manager boolean -- wanted to be manager: null: he didn't choose to be a manager, 
-    -- 0: asked to be manager but not approved yet, 1: now he's manager--
+    Role varchar(1) not null  -- 0 for admin, 1 for Manager, 2 for Fan Who Wants Managment, 3 for Fan
 );
 
 CREATE TABLE IF NOT EXISTS Stadiums
@@ -56,19 +54,19 @@ CREATE TABLE IF NOT EXISTS Reserve
 /*Insert Records*/
 
 -- IT Adminstrators -- 
-INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role, Manager)
-VALUES ("medhat", "Medhat", "Nabel", "Nabel@gmail.com", "1999-01-01", "Male", "999879", "Egyptian", 2, null);                                 
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+VALUES ("medhat", "Medhat", "Nabel", "Nabel@gmail.com", "1999-01-01", "Male", "999879", "Egyptian", 0);                                 
 
 -- managers --
-INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role, Manager)
-Values('ola', 'ola', 'adel', 'ola11@gmail.com', '1999-01-01', 'Female', '123456', 'Palestinian', 1, 1);
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+Values('ola', 'ola', 'adel', 'ola11@gmail.com', '1999-01-01', 'Female', '123456', 'Palestinian', 1);
 
 -- Fan want to be a manager --
-INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role, Manager)
-Values('amira', 'Amira', 'Ahmed', 'amiraaa@gmail.com', '1999-01-01', 'Female', '123456', 'Yemeni', 0, 0);
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+Values('amira', 'Amira', 'Ahmed', 'amiraaa@gmail.com', '1999-01-01', 'Female', '123456', 'Yemeni', 2);
 
 -- Fan --
-INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role, Manager)
-Values('ahmed', 'Ahmed', 'Ali', 'ahmed@gmail.com', '1999-01-01', 'Male', '123456', 'Saudi', 0, null);
+INSERT INTO Users (UserName, FirstName, LastName, Email, BirthDate, Gender, Password, Nationality, Role)
+Values('ahmed', 'Ahmed', 'Ali', 'ahmed@gmail.com', '1999-01-01', 'Male', '123456', 'Saudi', 3);
 
 select * from Users;

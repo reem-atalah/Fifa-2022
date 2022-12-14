@@ -81,9 +81,6 @@
                 <mxCell id="VCr87URF9lmy609KNcGK-21" value="Role" style="rounded=0;whiteSpace=wrap;html=1;fontSize=17;" parent="56" vertex="1">
                     <mxGeometry y="293" width="200" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="55" value="Manager" style="whiteSpace=wrap;html=1;fontSize=17;" vertex="1" parent="56">
-                    <mxGeometry y="322" width="200" height="31" as="geometry"/>
-                </mxCell>
                 <mxCell id="57" value="" style="group" vertex="1" connectable="0" parent="58">
                     <mxGeometry y="53" width="200" height="240" as="geometry"/>
                 </mxCell>
@@ -139,6 +136,12 @@
                 </mxCell>
                 <mxCell id="VCr87URF9lmy609KNcGK-36" value="NumSeatsPerRow" style="whiteSpace=wrap;html=1;fontSize=17;" parent="65" vertex="1">
                     <mxGeometry x="20" y="109" width="200" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="72" value="&lt;div&gt;&amp;nbsp; &amp;nbsp; Role varchar(1) not null&amp;nbsp; -- 0 for admin, 1 for Manager, 2 for Fan Who Wants Managment, 3 for Fan&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fontSize=17;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="490" width="410" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="73" style="edgeStyle=none;html=1;entryX=0.53;entryY=-0.01;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=17;" edge="1" parent="1" source="VCr87URF9lmy609KNcGK-21" target="72">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
