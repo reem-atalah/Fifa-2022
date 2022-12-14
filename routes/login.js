@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
         break;
     }
     console.log(global_type);
-    var sql_query1 = `SELECT * from User where Username = "${sign_in_Username}";`
+    var sql_query1 = `SELECT * from Users where Username = "${sign_in_Username}";`
     var executed1 = await applyQuery(sql_query1);
     console.log(executed1);
 

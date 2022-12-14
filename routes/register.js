@@ -2,13 +2,13 @@ const router = require('express').Router();
 
 var db = require('../db');
 
-// render the signup page
+// render the register page
 router.get('/', async (req, res) => {
 
   console.log('get');
 
-  return res.render('signup', {
-    title: 'signup',
+  return res.render('register', {
+    title: 'register',
     css: 'login'
   });
 });
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
   var Nationality = req.body.Nationality;
   var Role = req.body.Role;
 
-  console.log('Posting to Signup');
+  console.log('Posting to register');
   console.log(`Data: ${FirstName}, ${LastName}, ${Username}, ${Password}, ${Email},\
          ${Birthdate}, ${Gender}, ${Nationality}, ${Role}`);
 
@@ -70,9 +70,9 @@ router.post('/', async (req, res) => {
   catch (e) {
     console.log(e)
     return res.status(401).send(e);
-    // return res.render('signup', {
-    //     title: 'signup',
-    //     css:'signup',    
+    // return res.render('register', {
+    //     title: 'register',
+    //     css:'register',    
     //     message: e.message
     // });
   }
