@@ -22,12 +22,34 @@ router.post('/', async (req, res) => {
 
     // check if the user exists
     if (executed1.length == 0) {
-      throw "UserName does not exist";
+      // throw "UserName does not exist";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'UserName does not exist',
+          'data': '',
+        },
+      });
     }
 
     // check if the password is correct 
     if (executed1[0].Password != sign_in_Password) {
-      throw "Password is incorrect";
+      // throw "Password is incorrect";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'Password is incorrect',
+          'data': '',
+        },
+      });
     }
 
     global_username = sign_in_Username;
@@ -66,7 +88,9 @@ const applyQuery = (query) => {
         if (!error) {
           resolve(rows);
         }
-        else { reject(new Error(error)); }
+        else { 
+          reject(new Error(error));
+        }
       })
     }, 10);
   });

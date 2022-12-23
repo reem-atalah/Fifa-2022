@@ -18,16 +18,26 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
 
   const ID = req.params.id;
-  console.log('Getting Match with id: ' + ID);
+  // console.log('Getting Match with id: ' + ID);
 
   var sql_query1 = `SELECT * from Matches where ID = "${ID}";`
   try {
     var executed1 = await applyQuery(sql_query1);
     // No Matches Found
     if (executed1.length == 0) {
-      throw "No match found for given ID";
+      return res.status(400).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'No match found with given ID',
+          'data': '',
+        },
+      });
     }
-    console.log(executed1);
+    // console.log(executed1);
 
     return res.status(200).json(executed1);
   }
@@ -63,7 +73,17 @@ router.post('/', async (req, res) => {
 
   try {
     if (Team1 == Team2) {
-      throw "Team1 and Team2 cannot be the same";
+      return res.status(400).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'Team1 and Team2 cannot be the same',
+          'data': '',
+        },
+      });
     }
     // if (Referee == Linesman1 || Referee == Linesman2 || Linesman1 == Linesman2) {
     //   throw "Referees and Linesmen must be different";
@@ -82,7 +102,17 @@ router.post('/', async (req, res) => {
       // Differnece in minutes
       var diff = Math.abs(time1 - time2) / 1000 / 60;
       if (diff < 120) {
-        throw "Teams have conflicting matches";
+        return res.status(400).json({
+          'meta': {
+            'status': 500,
+            'msg': 'INTERNAL_SERVER_ERROR',
+          },
+    
+          'res': {
+            'error': 'Teams have conflicting matches',
+            'data': '',
+          },
+        });
       }
     }
 
@@ -90,7 +120,17 @@ router.post('/', async (req, res) => {
     var sql_query2 = `SELECT Time from Matches where StadiumID = "${StadiumID}";`
     var executed2 = await applyQuery(sql_query2);
     if (executed2.length == 0) {
-      throw "Stadium does not exist";
+        return res.status(400).json({
+          'meta': {
+            'status': 500,
+            'msg': 'INTERNAL_SERVER_ERROR',
+          },
+    
+          'res': {
+            'error': 'No stadium found with given ID',
+            'data': '',
+          },
+        });
     }
     for (var i = 0; i < executed2.length; i++) {
       // handle datetime object from mysql
@@ -102,7 +142,16 @@ router.post('/', async (req, res) => {
       // Differnece in minutes
       var diff = Math.abs(time1 - time2) / 1000 / 60;
       if (diff < 120) {
-        throw "Stadium is busy at this time";
+        return res.status(400).json({
+          'meta': {
+            'status': 500,
+            'msg': 'INTERNAL_SERVER_ERROR',
+          },
+          'res': {
+            'error': 'Stadium is busy at this time',
+            'data': '',
+          },
+        });
       }
     }
 
@@ -116,11 +165,9 @@ router.post('/', async (req, res) => {
 
       var sql_query1 = `SELECT * from Matches where ID = "${id}";`
       var executed1 = await applyQuery(sql_query1);
-      console.log(executed1);
+      // console.log(executed1);
 
       return res.status(200).json(executed1);
-      // Redirect to Get /matches/id
-      // return res.redirect('/matches/' + id);
     }
   }
   catch (e) {
