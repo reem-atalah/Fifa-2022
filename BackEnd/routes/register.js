@@ -39,7 +39,18 @@ router.post('/', async (req, res) => {
 
   try {
     if (Role === '0') {
-      throw "You are not allowed to register as an IT Administrator";
+      // throw "You are not allowed to register as an IT Administrator";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'You are not allowed to register as an IT Administrator',
+          'data': '',
+        },
+      });
     }
     else if (Role === '1') {
       Role = 2
@@ -48,7 +59,18 @@ router.post('/', async (req, res) => {
 
     //if the username is arleady in use, must change it
     if (executed1.length != 0) {
-      throw "Username is already in use";
+      // throw "Username is already in use";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'Username is already in use',
+          'data': '',
+        },
+      });
     }
 
     var executed = await applyQuery(sql_query);

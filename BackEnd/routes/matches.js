@@ -14,7 +14,18 @@ router.get('/:id', async (req, res) => {
     var executed1 = await applyQuery(sql_query1);
     // No Matches Found
     if (executed1.length == 0) {
-      throw "No Match Found With Given ID";
+      // throw "No Match Found With Given ID";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'No Match Found With Given ID',
+          'data': '',
+        },
+      });
     }
     console.log(executed1);
 
@@ -47,10 +58,32 @@ router.post('/', async (req, res) => {
 
   try {
     if (Team1 == Team2) {
-      throw "Team1 and Team2 cannot be the same";
+      // throw "Team1 and Team2 cannot be the same";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'Team1 and Team2 cannot be the same',
+          'data': '',
+        },
+      });
     }
     if (Referee == Linesman1 || Referee == Linesman2 || Linesman1 == Linesman2) {
-      throw "Referees and Linesmen must be different";
+      // throw "Referees and Linesmen must be different";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'Referees and Linesmen must be different',
+          'data': '',
+        },
+      });
     }
     // console.log(sql_query);
     var executed = await applyQuery(sql_query);

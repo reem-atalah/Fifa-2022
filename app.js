@@ -28,12 +28,10 @@ app.set('view engine', 'ejs');
 
 app.use(fileUpload()); //to upload files/pictures
 
-// app.get('/', (req, res) => {
+app.get('/', (req, res) => {
     
-//     res.render('t');
-
-//     // return res.redirect('signup');
-// });
+    return res.redirect('home');
+});
 
 //flash messages middleware
 app.use(require('connect-flash')());
@@ -47,6 +45,8 @@ app.use((req, res, next) => {
 app.use('/login', require('./BackEnd/routes/login'));
 app.use('/register', require('./BackEnd/routes/register'));
 app.use('/matches', require('./BackEnd/routes/matches'));
+app.use('/home', require('./BackEnd/routes/home'));
+
 
 global.global_username = "";
 global.global_type = "";
