@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS Reserve
     MatchID int not null,
     foreign key (MatchID) references Matches(ID),
     SeatNo int not null,
-    TicketID int not null
+    -- Seats cant be booked twice in the same match
+    primary key (MatchID, SeatNo)
 );
 
 /*Insert Records*/
