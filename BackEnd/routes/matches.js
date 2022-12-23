@@ -230,7 +230,9 @@ router.put('/:id', async (req, res) => {
     try {
       var executed = await applyQuery(sql_query);
       if (executed) {
-        return res.status(200).send("Match Updated Successfully");
+        return res.status(200).json({
+          "res": "Match Updated Successfully"
+        });
       }
     }
     catch (e) {
@@ -240,7 +242,16 @@ router.put('/:id', async (req, res) => {
   }
   else
   {
-    return res.status(400).send("No data to update");
+    return res.status(400).json({
+      'meta': {
+        'status': 500,
+        'msg': 'INTERNAL_SERVER_ERROR',
+      },
+      'res': {
+        'error': 'No data to update',
+        'data': '',
+      },
+    });
   }
 });
 
