@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 // const ejs = require('ejs');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
  
 const fileUpload = require('express-fileupload');
 
@@ -32,6 +34,9 @@ app.get('/', (req, res) => {
     
     return res.redirect('home');
 });
+app.use(cors({
+    origin: '*'
+}));
 
 //flash messages middleware
 app.use(require('connect-flash')());
