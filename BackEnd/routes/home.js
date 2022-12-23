@@ -10,11 +10,7 @@ sql_query = "SELECT * FROM Matches"
 matches.push(await applyQuery(sql_query));
 
 
-res.render('home', {
-title: 'home',
-css: 'home', 
-matches:matches,
-})
+return res.status(200).json(matches);
  
 });
 

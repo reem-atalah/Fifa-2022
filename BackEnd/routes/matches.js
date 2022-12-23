@@ -18,12 +18,8 @@ router.get('/:id', async (req, res) => {
     }
     console.log(executed1);
 
-    return res.status(200).send(executed1);
+    return res.status(200).json(executed1);
 
-    return res.render('matches', {
-      title: 'matches',
-      css: 'matches'
-    });
   }
   catch (e) {
     console.log(e);
@@ -72,18 +68,14 @@ router.post('/', async (req, res) => {
       var executed1 = await applyQuery(sql_query1);
       console.log(executed1);
 
+      return res.status(200).json(executed1);
       // Redirect to Get /matches/id
-      return res.redirect('/matches/' + id); 
+      // return res.redirect('/matches/' + id); 
     }
   }
   catch (e) {
     console.log(e)
     return res.status(401).send(e);
-    // return res.render('signup', {
-    //     title: 'signup',
-    //     css:'signup',    
-    //     message: e.message
-    // });
   }
 }
 );

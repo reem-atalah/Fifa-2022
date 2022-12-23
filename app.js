@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const ejs = require('ejs');
+// const ejs = require('ejs');
 const bodyParser = require('body-parser');
  
 const fileUpload = require('express-fileupload');
@@ -28,12 +28,12 @@ app.set('view engine', 'ejs');
 
 app.use(fileUpload()); //to upload files/pictures
 
-app.get('/', (req, res) => {
+// app.get('/', (req, res) => {
     
-    res.render('t');
+//     res.render('t');
 
-    // return res.redirect('signup');
-});
+//     // return res.redirect('signup');
+// });
 
 //flash messages middleware
 app.use(require('connect-flash')());
@@ -42,16 +42,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.use((req, res, next) => {
-//     res.locals.isAuthenticatedd = req.isAuthenticated();
-//     next();
-// })
-
 
 // app.use('/home', require('./routes/home'));
-app.use('/login', require('./routes/login'));
-app.use('/register', require('./routes/register'));
-app.use('/matches', require('./routes/matches'));
+app.use('/login', require('./BackEnd/routes/login'));
+app.use('/register', require('./BackEnd/routes/register'));
+app.use('/matches', require('./BackEnd/routes/matches'));
 
 global.global_username = "";
 global.global_type = "";

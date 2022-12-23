@@ -4,10 +4,8 @@ var db = require('../db');
 
 router.get('/', async (req, res) => {
 
-  return res.render('login', {
-    title: 'login',
-    css: 'login'
-  })
+  return res.status(200).json();
+
 });
 
 
@@ -52,15 +50,11 @@ router.post('/', async (req, res) => {
     var executed1 = await applyQuery(sql_query1);
     console.log(executed1);
 
-    return res.redirect('/account_settings');
+    return res.status(200).json(executed1);
   }
   catch (e) {
     console.log(e);
-    res.status(401).send(e);
-    return res.render('login', {
-      title: 'login',
-      css: 'login',
-    });
+    return res.status(401).send(e);
   }
 }
 

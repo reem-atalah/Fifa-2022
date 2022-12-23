@@ -5,12 +5,8 @@ var db = require('../db');
 // render the register page
 router.get('/', async (req, res) => {
 
-  console.log('get');
+  return res.status(200).json();
 
-  return res.render('register', {
-    title: 'register',
-    css: 'login'
-  });
 });
 
 router.post('/', async (req, res) => {
@@ -61,20 +57,13 @@ router.post('/', async (req, res) => {
       var executed1 = await applyQuery(sql_query1);
       console.log(executed1);
 
-      return res.render('login', {
-        title: 'login',
-        css: 'login'
-      })
+      // return json
+      return res.status(200).json(executed1);
     }
   }
   catch (e) {
     console.log(e)
     return res.status(401).send(e);
-    // return res.render('register', {
-    //     title: 'register',
-    //     css:'register',    
-    //     message: e.message
-    // });
   }
 }
 );
