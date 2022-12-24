@@ -1,0 +1,6 @@
+.title {
+	@apply text-5xl mb-8;
+}
+.info-msg {
+	@apply text-center mt-8;
+}
