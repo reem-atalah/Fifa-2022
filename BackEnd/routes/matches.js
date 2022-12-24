@@ -8,9 +8,20 @@ var db = require('../db');
 router.get('/', async (req, res) => {
 
   var sql_query = `SELECT * from Matches`;
-  executed = await applyQuery(sql_query);
+  var executed1 = await applyQuery(sql_query);
 
-  res.send(executed);
+  // store the stadium names in the matches
+  var stadium_names = [];
+  for (match in executed1) {
+    var sql_query2 = `SELECT Name from Stadiums where ID = "${executed1[match]['StadiumID']}";`
+    var executed2 = await applyQuery(sql_query2);
+    executed1[match]['StadiumName'] = executed2[0]['Name'];
+    stadium_names.push(executed2[0]['Name']);
+  }
+  return res.status(200).json({
+    "match": executed1,
+    "stadium": stadium_names,
+  });
 });
 
 // Getting Match info
@@ -21,6 +32,7 @@ router.get('/:id', async (req, res) => {
   // console.log('Getting Match with id: ' + ID);
 
   var sql_query1 = `SELECT * from Matches where ID = "${ID}";`
+  
   try {
     var executed1 = await applyQuery(sql_query1);
     // No Matches Found
@@ -38,15 +50,7 @@ router.get('/:id', async (req, res) => {
       });
     }
     // console.log(executed1);
-    var sql_query2 = `SELECT StadiumID from Matches where ID = "${ID}";`
-    var executed2 = await applyQuery(sql_query2);
-    var sql_query3 = `SELECT * from Stadiums where ID = "${executed2[0]['StadiumID']}";`
-    var executed3 = await applyQuery(sql_query3);
-
-    return res.status(200).json({
-      "match": executed1,
-      "stadium": executed3,
-    });
+    return res.status(200).json(executed1);
   }
   catch (e) {
     console.log(e);
