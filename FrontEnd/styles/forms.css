@@ -1,7 +1,7 @@
 .form {
-	@apply flex flex-col space-y-2;
+	@apply flex flex-wrap items-center justify-between;
 }
 
 .form--submit {
-	@apply bg-red-800 py-2 px-8 rounded text-white text-lg;
+	@apply bg-red-800 py-2 px-8 rounded text-white text-lg w-full mt-8;
 }

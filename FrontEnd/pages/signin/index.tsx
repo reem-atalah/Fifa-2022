@@ -1,9 +1,9 @@
 import React from "react";
-import SigninComponent from "../components/SigninComponent";
+import SigninComponent from "../../components/SigninComponent/SigninComponent";
 import Head from "next/head";
 import type { GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
-import Layout from "../layout/Layout";
+import Layout from "../../layout/Layout";
 import Link from "next/link";
 import styles from "./signin.module.css";
 

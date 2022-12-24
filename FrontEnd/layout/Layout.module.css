@@ -1,19 +1,22 @@
 .layout_wrapper {
-	@apply flex h-screen justify-center items-center bg-gray-300;
+	@apply flex min-h-screen justify-center items-center bg-gray-300;
 }
 
 .layout_wrapper__card {
-	@apply w-3/5 grid grid-cols-2;
+	@apply w-1/2 max-[420px]:w-auto lg:w-3/5 lg:min-w-[900px] grid lg:grid-cols-2;
 }
 
 .layout_wrapper__card-left {
 	@apply max-h-full flex flex-col justify-center items-center gap-8 bg-red-800 p-4 rounded-l;
+}
+.layout_wrapper__card-left img:first-child {
+	@apply max-h-full h-2/4 w-0 lg:w-auto;
 }
 
 .layout_wrapper__card-right {
 	@apply bg-white rounded-r flex justify-center;
 }
 
-.layout_wrapper__card-right > div {
+.layout_wrapper__card-right > :first-child:is(div) {
 	@apply flex flex-col justify-center flex-1 p-5;
 }

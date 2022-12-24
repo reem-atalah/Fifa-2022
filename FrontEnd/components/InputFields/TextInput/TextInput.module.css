@@ -1,5 +1,5 @@
 .textinput_wrapper {
-	@apply flex flex-col space-y-2;
+	@apply flex flex-col space-y-2 w-full;
 }
 
 .textinput_wrapper__label {
@@ -11,7 +11,7 @@
 }
 
 .textinput_wrapper__error {
-	@apply text-red-500;
+	@apply text-red-500 h-6;
 }
 .textinput_wrapper__input-error {
 	@apply border-2 border-red-500;

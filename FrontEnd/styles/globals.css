@@ -5,3 +5,7 @@
 .filter-opacity-50 {
 	filter: opacity(0.5) drop-shadow(0 0 0 rgb(214, 147, 23));
 }
+
+.error-msg {
+	@apply text-red-500
+}

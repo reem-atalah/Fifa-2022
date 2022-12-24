@@ -4,10 +4,12 @@ import { useField, FieldHookConfig } from "formik";
 
 type TextFieldProp = {
 	label: string;
+	className?: string;
 };
 
 const TextInput = ({
 	label,
+	className,
 	...props
 }: TextFieldProp &
 	InputHTMLAttributes<HTMLInputElement> &
@@ -17,7 +19,7 @@ const TextInput = ({
 	const hasError = meta.touched && meta.error;
 
 	return (
-		<div className={styles["textinput_wrapper"]}>
+		<div className={`${className} ${styles["textinput_wrapper"]}`}>
 			<label
 				className={styles["textinput_wrapper__label"]}
 				htmlFor={props.id || props.name}
@@ -31,9 +33,10 @@ const TextInput = ({
 				{...field}
 				{...props}
 			/>
-			{hasError ? (
-				<div className={styles["textinput_wrapper__error"]}>{meta.error}</div>
-			) : null}
+
+			<div className={styles["textinput_wrapper__error"]}>
+				{hasError ? meta.error : ""}
+			</div>
 		</div>
 	);
 };
