@@ -4,10 +4,8 @@ var db = require('../db');
 
 router.get('/', async (req, res) => {
 
-  return res.render('login', {
-    title: 'login',
-    css: 'login'
-  })
+  return res.status(200).json();
+
 });
 
 
@@ -24,12 +22,34 @@ router.post('/', async (req, res) => {
 
     // check if the user exists
     if (executed1.length == 0) {
-      throw "UserName does not exist";
+      // throw "UserName does not exist";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'UserName does not exist',
+          'data': '',
+        },
+      });
     }
 
     // check if the password is correct 
     if (executed1[0].Password != sign_in_Password) {
-      throw "Password is incorrect";
+      // throw "Password is incorrect";
+      return res.status(401).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+  
+        'res': {
+          'error': 'Password is incorrect',
+          'data': '',
+        },
+      });
     }
 
     global_username = sign_in_Username;
@@ -52,15 +72,11 @@ router.post('/', async (req, res) => {
     var executed1 = await applyQuery(sql_query1);
     console.log(executed1);
 
-    return res.redirect('/account_settings');
+    return res.status(200).json(executed1);
   }
   catch (e) {
     console.log(e);
-    res.status(401).send(e);
-    return res.render('login', {
-      title: 'login',
-      css: 'login',
-    });
+    return res.status(401).send(e);
   }
 }
 
@@ -72,7 +88,9 @@ const applyQuery = (query) => {
         if (!error) {
           resolve(rows);
         }
-        else { reject(new Error(error)); }
+        else { 
+          reject(new Error(error));
+        }
       })
     }, 10);
   });
