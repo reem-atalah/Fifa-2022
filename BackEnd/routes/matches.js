@@ -38,8 +38,15 @@ router.get('/:id', async (req, res) => {
       });
     }
     // console.log(executed1);
+    var sql_query2 = `SELECT StadiumID from Matches where ID = "${ID}";`
+    var executed2 = await applyQuery(sql_query2);
+    var sql_query3 = `SELECT * from Stadiums where ID = "${executed2[0]['StadiumID']}";`
+    var executed3 = await applyQuery(sql_query3);
 
-    return res.status(200).json(executed1);
+    return res.status(200).json({
+      "match": executed1,
+      "stadium": executed3,
+    });
   }
   catch (e) {
     console.log(e);
