@@ -1,0 +1,18 @@
+.textinput_wrapper {
+	@apply flex flex-col space-y-2;
+}
+
+.textinput_wrapper__label {
+	@apply font-semibold text-slate-600;
+}
+
+.textinput_wrapper__input {
+	@apply p-2 rounded outline-0 border-[1px] border-gray-300;
+}
+
+.textinput_wrapper__error {
+	@apply text-red-500;
+}
+.textinput_wrapper__input-error {
+	@apply border-2 border-red-500;
+}

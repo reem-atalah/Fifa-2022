@@ -1,0 +1,11 @@
+.title {
+	@apply text-5xl;
+}
+
+.paragraph {
+	@apply text-gray-500 my-4;
+}
+
+.info-msg {
+	@apply text-center mt-8;
+}
