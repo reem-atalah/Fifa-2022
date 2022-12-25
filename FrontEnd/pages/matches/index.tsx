@@ -3,15 +3,15 @@ import Match from "../../features/match/domain/Match";
 import Image from "next/image";
 
 type Props = {
-	matches: Match[];
+  matches: Match[];
 };
 
 export default function Matches({ matches }: Props) {
 	const s = {"nfd": "nfd"};
 	console.log(s)
-	console.log(matches[0])
+	console.log(matches)
 	return (
-		<div className="w-screen h-screen bg-red-400">
+		<div className="bg-red-400">
 			<div className="container">
 				<div className="flex flex-row gap-8 text-white justify-start pl-3 pt-3">
 					<div className="flex flex-col justify-center">
@@ -35,7 +35,7 @@ export default function Matches({ matches }: Props) {
 					</div>
 				</div>
 				<div className="matches__content">
-					<h3 className="text-5xl font-bold text-white">Matches</h3>
+					<h3 className="text-5xl font-bold text-[rgb(40,0,0)] text-center">Matches</h3>
 					<div className="matches__content_list">
 						{matches?.map((match) => MatchComponent({ match }))}
 					</div>
@@ -45,14 +45,14 @@ export default function Matches({ matches }: Props) {
 	);
 }
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   // Fetch data from external API
   console.log("----");
   const res = await fetch(`http://localhost:8080/matches`);
-  const matches = await res.json();
+  const data = await res.json();
   
-  console.log(matches);
+  console.log(data);
   return {
-    props: { matches }, // will be passed to the page component as props
+    props: { ...data }, // will be passed to the page component as props
   };
 }
