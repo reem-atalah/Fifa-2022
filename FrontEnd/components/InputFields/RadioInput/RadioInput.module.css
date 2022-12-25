@@ -1,0 +1,8 @@
+.input-wrapper {
+	@apply flex space-x-2 p-2;
+}
+.input-wrapper__input {
+	@apply w-5;
+}
+.input-wrapper__label {
+}

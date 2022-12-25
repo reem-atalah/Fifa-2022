@@ -1,0 +1,3 @@
+.text-input {
+	@apply w-[49%] min-w-[200px];
+}

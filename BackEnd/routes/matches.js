@@ -7,21 +7,17 @@ var db = require('../db');
 // Get all matches
 router.get('/', async (req, res) => {
 
-  var sql_query = `SELECT * from Matches`;
+  var sql_query = `
+  SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, t1.Name as Team1Name, t2.Name as Team2Name
+  FROM matches as m 
+  left join stadiums as s on m.StadiumID = s.ID
+  left join teams as t1 on m.Team1 = t1.ID
+  left join teams as t2 on m.Team2 = t2.ID;`;
   var executed1 = await applyQuery(sql_query);
 
-  // store the stadium names in the matches
-  var stadium_names = [];
-  for (match in executed1) {
-    var sql_query2 = `SELECT Name from Stadiums where ID = "${executed1[match]['StadiumID']}";`
-    var executed2 = await applyQuery(sql_query2);
-    executed1[match]['StadiumName'] = executed2[0]['Name'];
-    stadium_names.push(executed2[0]['Name']);
-  }
   return res.status(200).json({
-    "match": executed1,
-    "stadium": stadium_names,
-  });
+    "matches": executed1,
+  }); 
 });
 
 // Getting Match info
@@ -32,7 +28,7 @@ router.get('/:id', async (req, res) => {
   // console.log('Getting Match with id: ' + ID);
 
   var sql_query1 = `SELECT * from Matches where ID = "${ID}";`
-  
+
   try {
     var executed1 = await applyQuery(sql_query1);
     // No Matches Found
@@ -42,7 +38,7 @@ router.get('/:id', async (req, res) => {
           'status': 500,
           'msg': 'INTERNAL_SERVER_ERROR',
         },
-  
+
         'res': {
           'error': 'No match found with given ID',
           'data': '',
@@ -69,10 +65,10 @@ router.post('/', async (req, res) => {
   // TODO: check for null values
   // TODO: check for invalid values :O
   var StadiumID = req.body.StadiumID;
-  var Time      = req.body.Time;
-  var Team1     = req.body.Team1;
-  var Team2     = req.body.Team2;
-  var Referee   = req.body.Referee;
+  var Time = req.body.Time;
+  var Team1 = req.body.Team1;
+  var Team2 = req.body.Team2;
+  var Referee = req.body.Referee;
   var Linesman1 = req.body.Linesman1;
   var Linesman2 = req.body.Linesman2;
 
@@ -89,7 +85,7 @@ router.post('/', async (req, res) => {
           'status': 500,
           'msg': 'INTERNAL_SERVER_ERROR',
         },
-  
+
         'res': {
           'error': 'Team1 and Team2 cannot be the same',
           'data': '',
@@ -118,7 +114,7 @@ router.post('/', async (req, res) => {
             'status': 500,
             'msg': 'INTERNAL_SERVER_ERROR',
           },
-    
+
           'res': {
             'error': 'Teams have conflicting matches',
             'data': '',
@@ -131,17 +127,17 @@ router.post('/', async (req, res) => {
     var sql_query2 = `SELECT Time from Matches where StadiumID = "${StadiumID}";`
     var executed2 = await applyQuery(sql_query2);
     if (executed2.length == 0) {
-        return res.status(400).json({
-          'meta': {
-            'status': 500,
-            'msg': 'INTERNAL_SERVER_ERROR',
-          },
-    
-          'res': {
-            'error': 'No stadium found with given ID',
-            'data': '',
-          },
-        });
+      return res.status(400).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+
+        'res': {
+          'error': 'No stadium found with given ID',
+          'data': '',
+        },
+      });
     }
     for (var i = 0; i < executed2.length; i++) {
       // handle datetime object from mysql
@@ -202,10 +198,10 @@ router.put('/:id', async (req, res) => {
   // TODO: conflict on Teams
 
   var StadiumID = req.body.StadiumID;
-  var Time      = req.body.Time;
-  var Team1     = req.body.Team1;
-  var Team2     = req.body.Team2;
-  var Referee   = req.body.Referee;
+  var Time = req.body.Time;
+  var Team1 = req.body.Team1;
+  var Team2 = req.body.Team2;
+  var Referee = req.body.Referee;
   var Linesman1 = req.body.Linesman1;
   var Linesman2 = req.body.Linesman2;
 
@@ -251,8 +247,7 @@ router.put('/:id', async (req, res) => {
       return res.status(400).send(e);
     }
   }
-  else
-  {
+  else {
     return res.status(400).json({
       'meta': {
         'status': 500,
@@ -324,10 +319,10 @@ router.get('/:id/seats', async (req, res) => {
   // return status for each seat!
   var list = []
   for (var i = 1; i <= maxSeats; i++) {
-    list.push({number: i, available: !reservedSeats.has(i)});
+    list.push({ number: i, available: !reservedSeats.has(i) });
   }
   //
-  return res.status(200).json({res: list});
+  return res.status(200).json({ res: list });
 });
 
 
@@ -335,8 +330,8 @@ router.get('/:id/seats', async (req, res) => {
 // parameters -> seat number
 router.post('/:id/seats', async (req, res) => {
 
-   if (global_type != "Admin" && global_type != "Manager" && global_type != "Fan") {
-     return res.status(401).json({
+  if (global_type != "Admin" && global_type != "Manager" && global_type != "Fan") {
+    return res.status(401).json({
       'meta': {
         'status': 401,
         'msg': 'UNAUTHORIZED',
@@ -345,8 +340,8 @@ router.post('/:id/seats', async (req, res) => {
         'error': 'Log in to use this feature',
         'data': '',
       }
-     })
-   }
+    })
+  }
 
   const mid = req.params.id;
   const seats = req.body.seats;
@@ -422,8 +417,7 @@ router.post('/:id/seats', async (req, res) => {
     Fail |= reservedSeats.has(seats[i]);
   }
   //
-  if (Fail)
-  {
+  if (Fail) {
     return res.status(400).json({
       'meta': {
         'status': 400,
@@ -451,8 +445,8 @@ router.post('/:id/seats', async (req, res) => {
 // Same Format as reserve
 router.delete('/:id/seats/', async (req, res) => {
 
-   if (global_type != "Admin" && global_type != "Manager" && global_type != "Fan") {
-     return res.status(401).json({
+  if (global_type != "Admin" && global_type != "Manager" && global_type != "Fan") {
+    return res.status(401).json({
       'meta': {
         'status': 401,
         'msg': 'UNAUTHORIZED',
@@ -461,8 +455,8 @@ router.delete('/:id/seats/', async (req, res) => {
         'error': 'Log in to use this feature',
         'data': '',
       }
-     })
-   }
+    })
+  }
 
   const mid = req.params.id;
   const seats = req.body.seats;
@@ -503,8 +497,7 @@ router.delete('/:id/seats/', async (req, res) => {
     Fail |= !reservedSeats.has(seats[i]);
   }
   //
-  if (Fail)
-  {
+  if (Fail) {
     return res.status(400).json({
       'meta': {
         'status': 400,
