@@ -9,7 +9,7 @@ const AuthStatusComponent = () => {
 		return (
 			<>
 			<div className="flex flex-row gap-4">
-			<h1 className="text-white font-bold m-auto">{session?.data?.user?.Username}</h1>
+			<Link href={`/users/${session?.data?.user?.Username}`} className="text-white font-bold m-auto">{session?.data?.user?.Username}</Link> {/* leave it with error */}
 			<button className="px-4 py-2 border-2 rounded text-white font-bold"  onClick={(e) => signOut({ redirect: false })}>Sign Out</button>
 			</div>
 			</>
