@@ -1,0 +1,9 @@
+.control_components {
+	@apply flex items-stretch gap-2;
+}
+.control_components--delete {
+	@apply text-xs p-2 bg-red-500 rounded text-white;
+}
+.control_components--toggle {
+	@apply text-xs p-2 bg-green-500 rounded text-white;
+}

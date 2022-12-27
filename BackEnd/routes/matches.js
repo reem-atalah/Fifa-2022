@@ -1,24 +1,22 @@
-const router = require('express').Router();
+const router = require("express").Router();
 
-var db = require('../db');
+var db = require("../db");
 
 // SQL injection? what's that?
 
 // Get all matches
-// anyone canget matches?
-router.get('/', async (req, res) => {
-
-  var sql_query = `
+router.get("/", async (req, res) => {
+	var sql_query = `
   SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, t1.Name as Team1Name, t2.Name as Team2Name
-  FROM matches as m 
-  left join stadiums as s on m.StadiumID = s.ID
-  left join teams as t1 on m.Team1 = t1.ID
-  left join teams as t2 on m.Team2 = t2.ID;`;
-  var executed1 = await applyQuery(sql_query);
+  FROM Matches as m 
+  left join Stadiums as s on m.StadiumID = s.ID
+  left join Teams as t1 on m.Team1 = t1.ID
+  left join Teams as t2 on m.Team2 = t2.ID;`;
+	var executed1 = await applyQuery(sql_query);
 
-  return res.status(200).json({
-    "matches": executed1,
-  }); 
+	return res.status(200).json({
+		matches: executed1,
+	});
 });
 
 // Getting Match info with the stadium
@@ -300,258 +298,265 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-
 // Seats status
-router.get('/:id/seats', async (req, res) => {
+router.get("/:id/seats", async (req, res) => {
+	// if (global_type != "Admin" && global_type != "Manager") {
+	//  return res.status(401).send("Unauthorized");
+	//
 
   if (global_type != "Admin" && global_type != "Manager") {
    return res.status(401).send("Unauthorized");
   }
+	const id = req.params.id;
 
-  const id = req.params.id;
-
-  // get max seats
-  var sql_query1 = `SELECT S.NumRows * S.NumSeatsPerRow as MaxSeats
+	// get max seats
+	var sql_query1 = `SELECT S.NumRows * S.NumSeatsPerRow as MaxSeats
                     FROM Stadiums AS S, Matches AS M
                     WHERE M.ID = "${id}" AND M.StadiumID = S.ID;`;
-  var executed1 = await applyQuery(sql_query1);
-  if (executed1.length == 0) {
-    return res.status(400).json({
-      'meta': {
-        'status': 500,
-        'msg': 'INTERNAL_SERVER_ERROR',
-      },
-      'res': {
-        'error': 'No match found with given ID',
-        'data': '',
-      },
-    });
-  }
+	var executed1 = await applyQuery(sql_query1);
+	if (executed1.length == 0) {
+		return res.status(400).json({
+			meta: {
+				status: 500,
+				msg: "INTERNAL_SERVER_ERROR",
+			},
+			res: {
+				error: "No match found with given ID",
+				data: "",
+			},
+		});
+	}
 
-  var maxSeats = executed1[0].MaxSeats;
-  var sql_query = `SELECT SeatNo FROM Reserve WHERE Reserve.MatchID = "${id}";`;
-  var executed = await applyQuery(sql_query);
-  // store reserved seats in a set
-  var reservedSeats = new Set();
-  for (var i = 0; i < executed.length; i++) {
-    reservedSeats.add(executed[i].SeatNo);
-  }
-  // return status for each seat!
-  var list = []
-  for (var i = 1; i <= maxSeats; i++) {
-    list.push({ number: i, available: !reservedSeats.has(i) });
-  }
-  //
-  return res.status(200).json({ res: list });
+	var maxSeats = executed1[0].MaxSeats;
+	var sql_query = `SELECT SeatNo FROM Reserve WHERE Reserve.MatchID = "${id}";`;
+	var executed = await applyQuery(sql_query);
+	// store reserved seats in a set
+	var reservedSeats = new Set();
+	for (var i = 0; i < executed.length; i++) {
+		reservedSeats.add(executed[i].SeatNo);
+	}
+	// return status for each seat!
+	var list = [];
+	for (var i = 1; i <= maxSeats; i++) {
+		list.push({ number: i, available: !reservedSeats.has(i) });
+	}
+	//
+	return res.status(200).json({ res: list });
 });
-
 
 // Reserve vacant seats
 // parameters -> seat number
-router.post('/:id/seats', async (req, res) => {
+router.post("/:id/seats", async (req, res) => {
+	if (
+		global_type != "Admin" &&
+		global_type != "Manager" &&
+		global_type != "Fan"
+	) {
+		return res.status(401).json({
+			meta: {
+				status: 401,
+				msg: "UNAUTHORIZED",
+			},
+			res: {
+				error: "Log in to use this feature",
+				data: "",
+			},
+		});
+	}
 
-  if (global_type != "Admin" && global_type != "Manager" && global_type != "Fan") {
-    return res.status(401).json({
-      'meta': {
-        'status': 401,
-        'msg': 'UNAUTHORIZED',
-      },
-      'res': {
-        'error': 'Log in to use this feature',
-        'data': '',
-      }
-    })
-  }
+	const mid = req.params.id;
+	const seats = req.body.seats;
+	// console.log(seats)
+	if (seats.length == 0) {
+		return res.status(400).json({
+			meta: {
+				status: 400,
+				msg: "BAD_REQUEST",
+			},
+			res: {
+				error: "No seats to reserve",
+				data: "",
+			},
+		});
+	}
 
-  const mid = req.params.id;
-  const seats = req.body.seats;
-  // console.log(seats)
-  if (seats.length == 0) {
-    return res.status(400).json({
-      'meta': {
-        'status': 400,
-        'msg': 'BAD_REQUEST',
-      },
-      'res': {
-        'error': 'No seats to reserve',
-        'data': '',
-      }
-    });
-  }
+	console.log("nameeeeeeee: " + global_username);
+	var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
+	var executed = await applyQuery(sql_query);
+	const uid = executed[0].ID;
+	// const uid = 1;
 
-  console.log('nameeeeeeee: ' + global_username)
-  var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
-  var executed = await applyQuery(sql_query);
-  const uid = executed[0].ID;
-  // const uid = 1;
+	// User has no conflicting match!
 
-  // User has no conflicting match!
-
-  // get match time
-  sql_query = `SELECT Time FROM Matches WHERE ID = "${mid}";`;
-  executed = await applyQuery(sql_query);
-  const matchTime = new Date(executed[0].Time);
-  //
-  sql_query = `SELECT M.Time FROM Reserve AS R, Matches AS M
+	// get match time
+	sql_query = `SELECT Time FROM Matches WHERE ID = "${mid}";`;
+	executed = await applyQuery(sql_query);
+	const matchTime = new Date(executed[0].Time);
+	//
+	sql_query = `SELECT M.Time FROM Reserve AS R, Matches AS M
                WHERE R.UserID = "${uid}" AND R.MatchID != "${mid}" AND M.ID = R.MatchID;`;
-  executed = await applyQuery(sql_query);
-  for (var i = 0; i < executed.length; i++) {
-    const time = new Date(executed[i].Time);
-    // Differnece in minutes
-    var diff = Math.abs(time - matchTime) / 1000 / 60;
-    if (diff < 120) {
-      return res.status(400).json({
-        'meta': {
-          'status': 400,
-          'msg': 'BAD_REQUEST',
-        },
-        'res': {
-          'error': 'You have another conflicting match',
-          'data': '',
-        },
-      });
-    }
-  }
+	executed = await applyQuery(sql_query);
+	for (var i = 0; i < executed.length; i++) {
+		const time = new Date(executed[i].Time);
+		// Differnece in minutes
+		var diff = Math.abs(time - matchTime) / 1000 / 60;
+		if (diff < 120) {
+			return res.status(400).json({
+				meta: {
+					status: 400,
+					msg: "BAD_REQUEST",
+				},
+				res: {
+					error: "You have another conflicting match",
+					data: "",
+				},
+			});
+		}
+	}
 
-  // get maxSeats
-  sql_query = `SELECT S.NumRows * S.NumSeatsPerRow as MaxSeats
+	// get maxSeats
+	sql_query = `SELECT S.NumRows * S.NumSeatsPerRow as MaxSeats
                FROM Stadiums AS S, Matches AS M
                WHERE M.ID = "${mid}" AND M.StadiumID = S.ID;`;
-  executed = await applyQuery(sql_query);
-  const maxSeats = executed[0].MaxSeats;
-  // console.log(maxSeats);
+	executed = await applyQuery(sql_query);
+	const maxSeats = executed[0].MaxSeats;
+	// console.log(maxSeats);
 
-  // get reserved seats
-  sql_query = `SELECT SeatNo FROM Reserve WHERE Reserve.MatchID = "${mid}";`;
-  executed = await applyQuery(sql_query);
-  // store reserved seats in a set
-  var reservedSeats = new Set();
-  for (var i = 0; i < executed.length; i++) {
-    reservedSeats.add(executed[i].SeatNo);
-  }
-  // all requested seats should be available
-  var Fail = false;
-  for (var i = 0; i < seats.length; i++) {
-    // console.log(seats[i]);
-    Fail |= seats[i] <= 0 || seats[i] > maxSeats;
-    Fail |= reservedSeats.has(seats[i]);
-  }
-  //
-  if (Fail) {
-    return res.status(400).json({
-      'meta': {
-        'status': 400,
-        'msg': 'BAD_REQUEST',
-      },
-      'res': {
-        'error': 'Not all requested seats are available',
-        'data': '',
-      },
-    });
-  }
+	// get reserved seats
+	sql_query = `SELECT SeatNo FROM Reserve WHERE Reserve.MatchID = "${mid}";`;
+	executed = await applyQuery(sql_query);
+	// store reserved seats in a set
+	var reservedSeats = new Set();
+	for (var i = 0; i < executed.length; i++) {
+		reservedSeats.add(executed[i].SeatNo);
+	}
+	// all requested seats should be available
+	var Fail = false;
+	for (var i = 0; i < seats.length; i++) {
+		// console.log(seats[i]);
+		Fail |= seats[i] <= 0 || seats[i] > maxSeats;
+		Fail |= reservedSeats.has(seats[i]);
+	}
+	//
+	if (Fail) {
+		return res.status(400).json({
+			meta: {
+				status: 400,
+				msg: "BAD_REQUEST",
+			},
+			res: {
+				error: "Not all requested seats are available",
+				data: "",
+			},
+		});
+	}
 
-  // loop on json object seats
-  for (var i = 0; i < seats.length; i++) {
-    var seatNo = seats[i];
-    var sql_query = `INSERT INTO Reserve (UserID, MatchID, SeatNo)
+	// loop on json object seats
+	for (var i = 0; i < seats.length; i++) {
+		var seatNo = seats[i];
+		var sql_query = `INSERT INTO Reserve (UserID, MatchID, SeatNo)
                      VALUES ("${uid}", "${mid}", "${seatNo}");`;
-    var executed = await applyQuery(sql_query);
-  }
+		var executed = await applyQuery(sql_query);
+	}
 
-  return res.status(200).json({ res: "Seats reserved successfully" });
+	return res.status(200).json({ res: "Seats reserved successfully" });
 });
 
 // Cancel reservation
 // Same Format as reserve
-router.delete('/:id/seats/', async (req, res) => {
+router.delete("/:id/seats/", async (req, res) => {
+	if (
+		global_type != "Admin" &&
+		global_type != "Manager" &&
+		global_type != "Fan"
+	) {
+		return res.status(401).json({
+			meta: {
+				status: 401,
+				msg: "UNAUTHORIZED",
+			},
+			res: {
+				error: "Log in to use this feature",
+				data: "",
+			},
+		});
+	}
 
-  if (global_type != "Admin" && global_type != "Manager" && global_type != "Fan") {
-    return res.status(401).json({
-      'meta': {
-        'status': 401,
-        'msg': 'UNAUTHORIZED',
-      },
-      'res': {
-        'error': 'Log in to use this feature',
-        'data': '',
-      }
-    })
-  }
+	const mid = req.params.id;
+	const seats = req.body.seats;
+	// console.log(seats)
+	if (seats.length == 0) {
+		return res.status(400).json({
+			meta: {
+				status: 400,
+				msg: "BAD_REQUEST",
+			},
+			res: {
+				error: "Empty request",
+				data: "",
+			},
+		});
+	}
 
-  const mid = req.params.id;
-  const seats = req.body.seats;
-  // console.log(seats)
-  if (seats.length == 0) {
-    return res.status(400).json({
-      'meta': {
-        'status': 400,
-        'msg': 'BAD_REQUEST',
-      },
-      'res': {
-        'error': 'Empty request',
-        'data': '',
-      }
-    });
-  }
+	console.log("nameeeeeeee: " + global_username);
+	var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
+	var executed = await applyQuery(sql_query);
+	const uid = executed[0].ID;
+	// const uid = 1;
 
-  console.log('nameeeeeeee: ' + global_username)
-  var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
-  var executed = await applyQuery(sql_query);
-  const uid = executed[0].ID;
-  // const uid = 1;
+	// User has no conflicting match!
 
-  // User has no conflicting match!
+	// get reserved seats by this user
+	sql_query = `SELECT SeatNo FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}";`;
+	executed = await applyQuery(sql_query);
+	// store reserved seats in a set
+	var reservedSeats = new Set();
+	for (var i = 0; i < executed.length; i++) {
+		reservedSeats.add(executed[i].SeatNo);
+	}
+	// all requested seats should be available
+	var Fail = false;
+	for (var i = 0; i < seats.length; i++) {
+		// console.log(seats[i]);
+		Fail |= !reservedSeats.has(seats[i]);
+	}
+	//
+	if (Fail) {
+		return res.status(400).json({
+			meta: {
+				status: 400,
+				msg: "BAD_REQUEST",
+			},
+			res: {
+				error: "Not all requested seats are reserved by this user",
+				data: "",
+			},
+		});
+	}
 
-  // get reserved seats by this user
-  sql_query = `SELECT SeatNo FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}";`;
-  executed = await applyQuery(sql_query);
-  // store reserved seats in a set
-  var reservedSeats = new Set();
-  for (var i = 0; i < executed.length; i++) {
-    reservedSeats.add(executed[i].SeatNo);
-  }
-  // all requested seats should be available
-  var Fail = false;
-  for (var i = 0; i < seats.length; i++) {
-    // console.log(seats[i]);
-    Fail |= !reservedSeats.has(seats[i]);
-  }
-  //
-  if (Fail) {
-    return res.status(400).json({
-      'meta': {
-        'status': 400,
-        'msg': 'BAD_REQUEST',
-      },
-      'res': {
-        'error': 'Not all requested seats are reserved by this user',
-        'data': '',
-      },
-    });
-  }
+	// loop on json object seats
+	for (var i = 0; i < seats.length; i++) {
+		var seatNo = seats[i];
+		// Delete
+		var sql_query = `DELETE FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}" AND SeatNo = "${seatNo}";`;
+		var executed = await applyQuery(sql_query);
+	}
 
-  // loop on json object seats
-  for (var i = 0; i < seats.length; i++) {
-    var seatNo = seats[i];
-    // Delete
-    var sql_query = `DELETE FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}" AND SeatNo = "${seatNo}";`;
-    var executed = await applyQuery(sql_query);
-  }
-
-  return res.status(200).json({ res: "Reservations cancelled successfully" });
+	return res.status(200).json({ res: "Reservations cancelled successfully" });
 });
 
 const applyQuery = (query) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      db.query(query, (error, rows) => {
-        if (!error) {
-          resolve(rows);
-        }
-        else { reject(new Error(error)); }
-      })
-    }, 10);
-  });
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			db.query(query, (error, rows) => {
+				if (!error) {
+					resolve(rows);
+				} else {
+					reject(new Error(error));
+				}
+			});
+		}, 10);
+	});
 };
 
 module.exports = router;
