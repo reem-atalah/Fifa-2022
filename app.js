@@ -52,6 +52,7 @@ app.use('/register', require('./BackEnd/routes/register'));
 app.use('/matches', require('./BackEnd/routes/matches'));
 app.use('/home', require('./BackEnd/routes/home'));
 app.use('/users', require('./BackEnd/routes/users'));
+app.use('/team', require('./BackEnd/routes/team'));
 
 global.global_username = "";
 global.global_type = "None";

@@ -24,6 +24,11 @@ router.post('/', async (req, res) => {
       return res.status(200).json("User doesn't exist");
     }
 
+    // handle nullity of user input for not changing those inputs
+    if(!username)
+    {
+      username = sql[0]['Username']
+    }
     if(!firstname)
     {
       firstname = sql[0]['FirstName']
@@ -35,6 +40,9 @@ router.post('/', async (req, res) => {
     if(!email)
     {
       email = sql[0]['Email']
+    }
+    else{// update email and it should be valid
+      let email_sql = `select * from Users where email = ${email}`;
     }
     if(!pass)
     {
@@ -52,7 +60,7 @@ router.post('/', async (req, res) => {
     {
       nationality = sql[0]['Nationality']
     }
-    // update email and it should be valid
+    
     // update password and hash it
 
     // update username at the end , then update the token (global_username)
