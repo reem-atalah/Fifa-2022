@@ -6,15 +6,21 @@ import SelectInput from "../InputFields/SelectInput/SelectInput";
 import validateMatchForm from "../../utils/validateMatchForm";
 import { createMatch } from "../../data/matches/MatchesMockApi";
 import { useRouter } from "next/router";
+import moment from "moment";
 const NewMatchForm = ({ teams, stadiums }: any) => {
 	const [error, setError] = useState("");
 	const router = useRouter();
 
 	const handleSubmit = async (values: any) => {
-		createMatch(values)
+		const { Date: date, Time: time, ...params } = values;
+
+		params.Time = moment(`${date} ${time}:00`)
+			.format("YYYY-MM-DD hh:mm:ss")
+			.toString();
+		createMatch(params)
 			.then((res) => {
 				console.log(res);
-				router.push("/");
+				router.push("/matches");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -25,7 +31,7 @@ const NewMatchForm = ({ teams, stadiums }: any) => {
 		<Formik
 			enableReinitialize
 			initialValues={{
-				StadiumID: "",
+				StadiumID: 0,
 				Date: "",
 				Time: "",
 				Team1: "",
@@ -65,7 +71,7 @@ const NewMatchForm = ({ teams, stadiums }: any) => {
 					<option label="-- select an option --"></option>
 
 					{stadiums.map((stadium: any) => (
-						<option key={`team1-${stadium.ID}`} value={stadium.ID}>
+						<option key={`stadium-${stadium.ID}`} value={stadium.ID}>
 							{stadium.Name}
 						</option>
 					))}

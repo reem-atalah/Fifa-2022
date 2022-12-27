@@ -5,9 +5,8 @@ interface errors {
 export default function validateMatchForm(
 	values: any,
 	possibleTeams: Array<string>,
-	possibleStadiums: Array<string>
+	possibleStadiums: Array<Number>
 ) {
-
 	const errors: errors = {};
 	if (!values.Team1) {
 		errors.Team1 = "Requried";
@@ -24,8 +23,7 @@ export default function validateMatchForm(
 	}
 	if (!values.StadiumID) {
 		errors.StadiumID = "Requried";
-	} else if (!(values.StadiumID in possibleStadiums)) {
-		console.log(values.StadiumID, possibleStadiums);
+	} else if (!possibleStadiums.includes(Number(values.StadiumID))) {
 		errors.StadiumID = "Invalid Stadium Value";
 	}
 
