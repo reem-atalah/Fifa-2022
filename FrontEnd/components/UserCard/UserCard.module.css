@@ -1,0 +1,18 @@
+.user_card {
+	@apply bg-white flex w-full justify-between p-2;
+}
+
+.user_card__heading {
+}
+
+.user_card__heading-name {
+	@apply basis-3/4 text-sm;
+}
+
+.user_card__heading-email {
+	@apply text-[10px] text-slate-500;
+}
+
+.user_card__role {
+	@apply basis-1/4 text-sm text-green-500 text-center;
+}
