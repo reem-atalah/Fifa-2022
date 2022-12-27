@@ -8,7 +8,7 @@ const AuthStatusComponent = () => {
 	if (session.status === "authenticated"){
 		return (
 			<>
-			<div className="flex flex-row gap-4">
+			<div className="flex flex-row gap-4 flex-wrap">
 			<Link href={`/users/${session?.data?.user?.Username}`} className="text-white font-bold m-auto">{session?.data?.user?.Username}</Link> {/* leave it with error */}
 			<button className="px-4 py-2 border-2 rounded text-white font-bold"  onClick={(e) => signOut({ redirect: false })}>Sign Out</button>
 			</div>
@@ -28,8 +28,8 @@ export default function Header() {
 	return (
 		<header className="relative bg-red-700 border-b-8 border-b-[rgb(30,0,0)]">
 			<div className="absolute inset-0 blur-sm z-[-1]"></div>
-			<div className="container mx-auto px-4 py-4 flex flex-row justify-between items-center">
-				<ul className="flex flex-row space-x-4">
+			<div className="container mx-auto px-4 py-4 flex flex-row flex-wrap justify-between items-center">
+				<ul className="flex flex-row flex-wrap space-x-4">
 					<li className="text-lg font-bold text-white">
 						<Link href="/">Home</Link>
 					</li>

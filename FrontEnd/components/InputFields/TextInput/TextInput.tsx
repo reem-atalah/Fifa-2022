@@ -19,7 +19,7 @@ const TextInput = ({
 	const hasError = meta.touched && meta.error;
 
 	return (
-		<div className={`${className} ${styles["textinput_wrapper"]}`}>
+		<div className={`${className || ""} ${styles["textinput_wrapper"]}`}>
 			<label
 				className={styles["textinput_wrapper__label"]}
 				htmlFor={props.id || props.name}

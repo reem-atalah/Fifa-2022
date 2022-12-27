@@ -1,7 +1,7 @@
 import MatchComponent from "../../components/match";
 import Match from "../../features/match/domain/Match";
 import Image from "next/image";
-import Header from "../../components/header";
+import Header from "../../components/Header/Header";
 
 type Props = {
   matches: Match[];

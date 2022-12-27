@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import AdminListElement from "../../components/AdminListElement";
-import Header from "../../components/header";
+import Header from "../../components/Header/Header";
 
 export interface User {
     ID: number

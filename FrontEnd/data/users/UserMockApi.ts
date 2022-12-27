@@ -3,6 +3,19 @@ import axios from "axios";
 type Props = {
 	Username: string;
 };
+
+export async function getAllUsers() {
+	return axios
+		.get("http://localhost:8080/users")
+		.then((res) => {
+			console.log(res.data);
+			return res.data;
+		})
+		.catch((err) => {
+			console.log(err);
+			return { Users: [] };
+		});
+}
 export async function deleteUser({ Username }: Props) {
 	return axios
 		.delete(`http://localhost:8080/users/${Username}`, {
