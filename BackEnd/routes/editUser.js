@@ -14,15 +14,37 @@ router.post('/', async (req, res) => {
     var gender = req.body.Gender;
     var nationality = req.body.Nationality;
 
-    var query= "UPDATE Users set FirstName ='" + firstname +"' where Username ='"+global_username+"'";
-    await applyQuery(query);
-    query= "UPDATE Users set LastName ='" + lastname +"' where Username ='"+global_username+"'";
-    await applyQuery(query);
+    // get the user, then update it once
+    query= "SELECT * FROM Users where Username ='"+global_username+"'";
+    sql =await applyQuery(query);
+
+    // if user doesn't exist
+    if(!sql)
+    {
+      return res.status(200).json("User doesn't exist");
+    }
+
+    if(!firstname)
+    {
+      firstname = sql[0]['FirstName']
+    }
+    if(!lastname)
+    {
+      lastname = sql[0]['LastName']
+    }
+    if(!email)
+    {
+      email = sql[0]['Email']
+    }
+    if(!pass)
+    {
+      pass = sql[0]['Password']
+    }
+    // update email and it should be valid
+    // update password and hash it
+
+    // update username at the end , then update the token (global_username)
     query= "UPDATE Users set Username ='" + username +"' where Username ='"+global_username+"'";
-    await applyQuery(query);
-    query= "UPDATE Users set Email ='" + email +"' where Username ='"+username+"'";
-    await applyQuery(query);
-    query= "UPDATE Users set Password ='" + pass +"' where Username ='"+username+"'";
     await applyQuery(query);
     query= "UPDATE Users set Birthdate ='" + birthdate +"' where Username ='"+username+"'";
     await applyQuery(query);
@@ -31,19 +53,9 @@ router.post('/', async (req, res) => {
     query= "UPDATE Users set Nationality ='" + nationality +"' where Username ='"+username+"'";
     await applyQuery(query);
     global_username=username;
-    query= "SELECT * FROM Users where Username ='"+username+"'";
-    sql =await applyQuery(query);
+    
 
-    return res.status(200).json({
-        'meta': {
-            'status': 200,
-            'msg': 'OK',
-        },
-        
-        'res': {
-            'error': '',
-            'data': 'User updated',
-    },});
+    return res.status(200).json('User updated');
 
 });
 

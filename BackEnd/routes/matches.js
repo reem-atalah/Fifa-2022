@@ -5,6 +5,7 @@ var db = require('../db');
 // SQL injection? what's that?
 
 // Get all matches
+// anyone canget matches?
 router.get('/', async (req, res) => {
 
   var sql_query = `
@@ -20,33 +21,54 @@ router.get('/', async (req, res) => {
   }); 
 });
 
-// Getting Match info
+// Getting Match info with the stadium
 // GET /matches/:id
 router.get('/:id', async (req, res) => {
 
   const ID = req.params.id;
-  // console.log('Getting Match with id: ' + ID);
 
-  var sql_query1 = `SELECT * from Matches where ID = "${ID}";`
+  // var sql_query1 = `SELECT * from Matches where ID = "${ID}";
+  var sql_query1 = `
+  SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, s.NumRows as Number_Rows, s.NumSeatsPerRow as NumSeatsPerRow, 
+  t1.Name as Team1Name, t2.Name as Team2Name, t1.picture as Team1Picture, t2.picture as Team2Picture
+  FROM matches as m 
+  left join stadiums as s on m.StadiumID = s.ID
+  left join teams as t1 on m.Team1 = t1.ID
+  left join teams as t2 on m.Team2 = t2.ID
+  where m.ID = ${ID} ;`;
+  
 
   try {
-    var executed1 = await applyQuery(sql_query1);
+    var executed1 = await applyQuery(sql_query1); 
     // No Matches Found
     if (executed1.length == 0) {
-      return res.status(400).json({
-        'meta': {
-          'status': 500,
-          'msg': 'INTERNAL_SERVER_ERROR',
-        },
-
-        'res': {
-          'error': 'No match found with given ID',
-          'data': '',
-        },
-      });
+      return res.status(400).json("No match found with given ID");
     }
-    // console.log(executed1);
-    return res.status(200).json(executed1);
+    let matchObject = executed1[0];
+
+    let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
+    join Users on UserID = ID
+    where MatchID = ${ID} and Username = "${global_username}";`;
+
+    let sql_query_not_user_seats = `SELECT  SeatNo FROM Reserve 
+    join Users on UserID = ID
+    where MatchID = ${ID} and Username != "${global_username}" ;`;
+
+    let executed2 = await applyQuery(sql_query_user_sets);
+    let executed3 = await applyQuery(sql_query_not_user_seats);
+
+
+
+    userSeatsList = [] 
+    nonUserSeatList = []
+    for(seat in executed2) userSeatsList.push(executed2[seat]['SeatNo'])
+    for(seat in executed3) nonUserSeatList.push(executed3[seat]['SeatNo'])
+
+    matchObject['UserList'] = userSeatsList;
+    matchObject['OtherList'] = nonUserSeatList;
+    return res.status(200).json({
+      matchObject,
+    });
   }
   catch (e) {
     console.log(e);
@@ -58,9 +80,9 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
 
   // Authourization
-  // if (global_type != "Admin" && global_type != "Manager") {
-  //   return res.status(401).send("Unauthorized");
-  // }
+  if (global_type != "Admin" && global_type != "Manager") {
+    return res.status(401).send("Unauthorized");
+  }
 
   // TODO: check for null values
   // TODO: check for invalid values :O
@@ -74,6 +96,8 @@ router.post('/', async (req, res) => {
 
   console.log('Posting to Matches');
   console.log(`Data: ${Team1} vs ${Team2} at ${StadiumID} at ${Time}, Referees: ${Referee}, ${Linesman1}, ${Linesman2}`);
+
+  // TODO: check conflicting time of teams
 
   var sql_query = `INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
         VALUES ("${StadiumID}", "${Time}", "${Team1}", "${Team2}", "${Referee}", "${Linesman1}", "${Linesman2}");`
@@ -92,9 +116,12 @@ router.post('/', async (req, res) => {
         },
       });
     }
-    // if (Referee == Linesman1 || Referee == Linesman2 || Linesman1 == Linesman2) {
-    //   throw "Referees and Linesmen must be different";
-    // }
+    // TODO: check conflicting Referee or Linesmen have another match at this time
+
+    // TODO: check if conflicting in choosing same person to multiple poitions in same match
+    if (Referee == Linesman1 || Referee == Linesman2 || Linesman1 == Linesman2) {
+      return res.status(401).send("Referees and Linesmen must be different");
+    }
 
     // Teams Have conflicting matches
     var sql_query1 = `SELECT Time from Matches where Team1 = "${Team1}" or Team2 = "${Team1}" or Team1 = "${Team2}" or Team2 = "${Team2}";`
@@ -103,9 +130,7 @@ router.post('/', async (req, res) => {
       // handle datetime object from mysql
       var time1 = new Date(executed1[i].Time);
       var time2 = new Date(Time);
-      //
-      // console.log(time1);
-      // console.log(time2);
+  
       // Differnece in minutes
       var diff = Math.abs(time1 - time2) / 1000 / 60;
       if (diff < 120) {
@@ -143,10 +168,8 @@ router.post('/', async (req, res) => {
       // handle datetime object from mysql
       var time1 = new Date(executed2[i].Time);
       var time2 = new Date(Time);
-      //
-      // console.log(time1);
-      // console.log(time2);
-      // Differnece in minutes
+
+      // Conflict match time in same Stadium
       var diff = Math.abs(time1 - time2) / 1000 / 60;
       if (diff < 120) {
         return res.status(400).json({
@@ -160,14 +183,11 @@ router.post('/', async (req, res) => {
           },
         });
       }
-    }
+    } 
 
-    // console.log(sql_query);
     var executed = await applyQuery(sql_query);
 
     if (executed) {
-      // console.log("Match Created Successfully");
-      // console.log(executed.insertId);
       id = executed.insertId
 
       var sql_query1 = `SELECT * from Matches where ID = "${id}";`
@@ -186,9 +206,9 @@ router.post('/', async (req, res) => {
 // Updating a match
 router.put('/:id', async (req, res) => {
 
-  // if (global_type != "Admin" && global_type != "Manager") {
-  //   return res.status(401).send("Unauthorized");
-  // }
+  if (global_type != "Admin" && global_type != "Manager") {
+    return res.status(401).send("Unauthorized");
+  }
 
   const id = req.params.id;
 
@@ -264,19 +284,19 @@ router.put('/:id', async (req, res) => {
 // Delete a match
 router.delete('/:id', async (req, res) => {
 
-  // if (global_type != "Admin" && global_type != "Manager") {
-  //   return res.status(401).send("Unauthorized");
-  // }
+  if (global_type != "Admin" && global_type != "Manager") {
+    return res.status(401).send("Unauthorized");
+  }
 
   const id = req.params.id;
 
   var sql_query = `DELETE FROM Matches where ID = "${id}";`
   try {
-    var executed = await applyQuery(sql_query);
+    await applyQuery(sql_query);
   }
   catch (e) {
     console.log(e);
-    return res.status(400).send(e);
+    return res.status(400).send("No match found with this ID");
   }
 });
 
@@ -284,9 +304,9 @@ router.delete('/:id', async (req, res) => {
 // Seats status
 router.get('/:id/seats', async (req, res) => {
 
-  // if (global_type != "Admin" && global_type != "Manager") {
-  //  return res.status(401).send("Unauthorized");
-  //
+  if (global_type != "Admin" && global_type != "Manager") {
+   return res.status(401).send("Unauthorized");
+  }
 
   const id = req.params.id;
 

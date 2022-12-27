@@ -54,7 +54,7 @@ app.use('/home', require('./BackEnd/routes/home'));
 app.use('/users', require('./BackEnd/routes/users'));
 
 global.global_username = "";
-global.global_type = "";
+global.global_type = "None";
 
 app.listen(port,(error)=>{ 
     if(error) return console.log(error);

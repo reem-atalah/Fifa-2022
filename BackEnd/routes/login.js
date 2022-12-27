@@ -14,6 +14,15 @@ router.post('/', async (req, res) => {
   const sign_in_Username = req.body.Username;
   const sign_in_Password = req.body.Password;
 
+  if(!sign_in_Username)
+  {
+    return res.status(401).json("You must enter UserName");
+  }
+  if(!sign_in_Password)
+  {
+    return res.status(401).json("You must enter Password");
+  }
+
   var sql_query1 = `SELECT Password from Users where Username = "${sign_in_Username}";`
 
   try {
@@ -23,35 +32,16 @@ router.post('/', async (req, res) => {
     // check if the user exists
     if (executed1.length == 0) {
       // throw "UserName does not exist";
-      return res.status(401).json({
-        'meta': {
-          'status': 500,
-          'msg': 'INTERNAL_SERVER_ERROR',
-        },
-  
-        'res': {
-          'error': 'UserName does not exist',
-          'data': '',
-        },
-      });
+      return res.status(401).json("UserName does not exist");
     }
 
     // check if the password is correct 
     if (executed1[0].Password != sign_in_Password) {
       // throw "Password is incorrect";
-      return res.status(401).json({
-        'meta': {
-          'status': 500,
-          'msg': 'INTERNAL_SERVER_ERROR',
-        },
-  
-        'res': {
-          'error': 'Password is incorrect',
-          'data': '',
-        },
-      });
+      return res.status(401).json("Password is not correct");
     }
 
+    // token
     global_username = sign_in_Username;
     switch (executed1[0].Role) {
       case 0:

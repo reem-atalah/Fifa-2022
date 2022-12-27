@@ -8,7 +8,8 @@ create table IF NOT exists Teams
 (
     ID int not null auto_increment,
     primary key (ID),
-    Name varchar(50) not null unique
+    Name varchar(50) not null unique,
+    picture varchar(1000)
 );
 
 create table IF NOT exists Users
@@ -18,7 +19,7 @@ create table IF NOT exists Users
     Username varchar(50) not null unique,
     FirstName varchar(50) not null,
     LastName varchar(50) not null,
-    Email varchar(50),
+    Email varchar(50) not null unique,
     BirthDate date,
     Gender varchar(6),
     Password varchar(50) not null,
@@ -130,3 +131,9 @@ VALUES ('S2', 5, 15);
 -- MATCHES
 INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
 VALUES (1, '2022-01-01 12:00:00', 1, 2, 'Ahmed', 'Ali', 'Mohamed');
+
+-- Reserve
+INSERT INTO Reserve (UserID ,MatchID ,SeatNo) VALUES (4,  1, 3);
+
+
+
