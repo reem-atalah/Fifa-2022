@@ -40,17 +40,23 @@ router.post('/', async (req, res) => {
     {
       pass = sql[0]['Password']
     }
+    if(!birthdate)
+    {
+      birthdate = sql[0]['BirthDate']
+    }
+    if(!gender)
+    {
+      gender = sql[0]['Gender']
+    }
+    if(!nationality)
+    {
+      nationality = sql[0]['Nationality']
+    }
     // update email and it should be valid
     // update password and hash it
 
     // update username at the end , then update the token (global_username)
     query= "UPDATE Users set Username ='" + username +"' where Username ='"+global_username+"'";
-    await applyQuery(query);
-    query= "UPDATE Users set Birthdate ='" + birthdate +"' where Username ='"+username+"'";
-    await applyQuery(query);
-    query= "UPDATE Users set Gender ='" + gender +"' where Username ='"+username+"'";
-    await applyQuery(query);
-    query= "UPDATE Users set Nationality ='" + nationality +"' where Username ='"+username+"'";
     await applyQuery(query);
     global_username=username;
     

@@ -65,7 +65,7 @@ router.get('/:id', async (req, res) => {
     matchObject['UserList'] = userSeatsList;
     matchObject['OtherList'] = nonUserSeatList;
     return res.status(200).json({
-      matchObject,
+      ...matchObject
     });
   }
   catch (e) {
