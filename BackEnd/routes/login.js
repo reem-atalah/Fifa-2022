@@ -57,10 +57,8 @@ router.post('/', async (req, res) => {
         global_type = "Fan";
         break;
     }
-    console.log(global_type);
     var sql_query1 = `SELECT * from Users where Username = "${sign_in_Username}";`
     var executed1 = await applyQuery(sql_query1);
-    console.log(executed1);
 
     return res.status(200).json(executed1);
   }

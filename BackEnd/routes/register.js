@@ -85,7 +85,7 @@ router.post('/', async (req, res) => {
         },
       });
     }
-    else if (Role === '1') { // wants to be admin
+    else if (Role === '1') { // wants to be manager
       Role = 2
     }
     var executed1 = await applyQuery(sql_query1);
