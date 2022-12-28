@@ -46,19 +46,24 @@ router.post('/', async (req, res) => {
     var executed1 = await applyQuery(sql_query1);
 
     // map the Role to word
-    type = "Fan"
+    let type = "Fan";
+    let type2 = "Fan";
     switch (executed1[0].Role) {
       case "0":
         type = "Admin";
+        type2 = "Admin";
         break;
       case "1":
         type = "Manager";
+        type2 = "Manager";
         break;
       case "2":
         type = "Fan";
+        type2 = "PendingManager";
         break;
       default:
         type = "Fan";
+        type2 = "Fan";
     }
     
     const user = executed1[0];
@@ -70,14 +75,12 @@ router.post('/', async (req, res) => {
     },
       process.env.KEY);
 
-    console.log(jwt.verify(token, process.env.KEY));
-
     // combine token and username in a json object
     const result = {
       id: user["ID"],
       name: user["Username"],
       email: user["Email"],
-      role: type,
+      role: type2,
       token: token
     }
 
