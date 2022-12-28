@@ -17,6 +17,7 @@ const NewMatchForm = ({ teams, stadiums }: any) => {
 		params.Time = moment(`${date} ${time}:00`)
 			.format("YYYY-MM-DD hh:mm:ss")
 			.toString();
+			
 		createMatch(params)
 			.then((res) => {
 				console.log(res);

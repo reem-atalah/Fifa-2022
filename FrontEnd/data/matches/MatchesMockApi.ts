@@ -8,7 +8,6 @@ export async function getAllMatches() {
 	return axios
 		.get("http://localhost:8080/matches")
 		.then((res) => {
-			console.log(res.data);
 			return res.data;
 		})
 		.catch((err) => {
