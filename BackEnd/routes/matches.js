@@ -27,17 +27,7 @@ router.get('/:id', async (req, res) => {
 
   const ID = req.params.id;
 
-  // Getting username from token
-  let username = null;
-  if (req.headers.authorization) {
-    const token = req.headers.authorization.split(' ')[1];
-    if (token) {
-      const decoded = jwt.verify(token, process.env.KEY);
-      if (decoded && decoded.username) {
-        username = decoded.username.toString();
-      }
-    }
-  }
+  let username = await getUsernameFromToken(req);
 
   let sql_query1 = `
   SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, s.NumRows as Number_Rows, s.NumSeatsPerRow as NumSeatsPerRow, 
@@ -245,6 +235,12 @@ async (req, res) => {
 
     // TODO:
     // CONFLICT If any user that has tickets for this match is going to be in another match at the same time
+    {
+      // Get all users who has tickets for this match
+      let sq = `SELECT UserID FROM Reserve WHERE MatchID = ${id};`;
+      let ex = await applyQuery(sq);
+      console.log(ex);
+    }
 
     //
     try {
@@ -285,9 +281,12 @@ router.delete('/:id',isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
 });
 
 // Seats status
-router.get("/:id/seats",isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
+router.get("/:id/seats", async (req, res) => {
 
 	const id = req.params.id;
+
+  // Getting username from token
+  let username = await getUsernameFromToken(req);
 
 	// get max seats
 	let sql_query1 = `SELECT S.NumRows * S.NumSeatsPerRow as MaxSeats
@@ -295,101 +294,81 @@ router.get("/:id/seats",isAuthorized(allEndpoints.AuthMatch), async (req, res) =
                     WHERE M.ID = "${id}" AND M.StadiumID = S.ID;`;
 	let executed1 = await applyQuery(sql_query1);
 	if (executed1.length == 0) {
-		return res.status(400).json({
-			meta: {
-				status: 500,
-				msg: "INTERNAL_SERVER_ERROR",
-			},
-			res: {
-				error: "No match found with given ID",
-				data: "",
-			},
-		});
+		return res.status(404).json({msg: 'Match not found'});
 	}
+  let maxSeats = executed1[0].MaxSeats;
 
-	let maxSeats = executed1[0].MaxSeats;
-	let sql_query = `SELECT SeatNo FROM Reserve WHERE Reserve.MatchID = "${id}";`;
-	let executed = await applyQuery(sql_query);
-	// store reserved seats in a set
-	let reservedSeats = new Set();
-	for (let i = 0; i < executed.length; i++) {
-		reservedSeats.add(executed[i].SeatNo);
-	}
-	// return status for each seat!
-	let list = [];
-	for (let i = 1; i <= maxSeats; i++) {
-		list.push({ number: i, available: !reservedSeats.has(i) });
-	}
-	//
-	return res.status(200).json({ res: list });
+  // User's Seats
+  userSeatsList = [];
+  if (username != null) {
+    let sql_query_user_sets = `SELECT SeatNo FROM Reserve 
+    join Users on UserID = ID
+    where MatchID = ${id} and Username = "${username}";`;
+    let executed2 = await applyQuery(sql_query_user_sets);
+    for (seat in executed2) userSeatsList.push(executed2[seat]["SeatNo"]);
+  }
+
+  // Others' seats
+  nonUserSeatList = [];
+  let sql_query_not_user_seats = `SELECT SeatNo FROM Reserve 
+  join Users on UserID = ID
+  where MatchID = ${id} and Username != "${username}" ;`;
+  if (username == null)
+    sql_query_not_user_seats = `SELECT SeatNo FROM Reserve Where MatchId = ${ID}`;
+  //
+  let executed3 = await applyQuery(sql_query_not_user_seats);
+  for (seat in executed3) nonUserSeatList.push(executed3[seat]["SeatNo"]);
+
+  // return json of both lists
+  return res.status(200).json({ "UserSeats": userSeatsList, "OthersSeats": nonUserSeatList, "maxSeats": maxSeats });
 });
 
 // Reserve vacant seats
 // parameters -> seat number
-router.post("/:Username/:id/seats", isAuthorized(allEndpoints.reserve), async (req, res) => {
+router.post("/:id/seats", isAuthorized(allEndpoints.reserve), async (req, res) => {
 
 	const mid = req.params.id;
-  const username = req.params.Username;
+  const username = await getUsernameFromToken(req);
 	const seats = req.body.seats;
+
 	// console.log(seats)
-	if (seats.length == 0) {
-		return res.status(400).json({
-			meta: {
-				status: 400,
-				msg: "BAD_REQUEST",
-			},
-			res: {
-				error: "No seats to reserve",
-				data: "",
-			},
-		});
+	if (!seats || seats.length == 0) {
+		return res.status(400).json({msg: "no seats requested"});
 	}
 
 	let sql_query = `SELECT ID FROM Users WHERE Username = "${username}";`;
+  console.log(sql_query);
 	let executed = await applyQuery(sql_query);
 	const uid = executed[0].ID;
-	// const uid = 1;
 
 	// User has no conflicting match!
-
-	// get match time
+  // get match time
 	sql_query = `SELECT Time FROM Matches WHERE ID = "${mid}";`;
 	executed = await applyQuery(sql_query);
+  if (!executed.length) {
+    return res.status(404).json({msg: 'Match not found'});
+  }
 	const matchTime = new Date(executed[0].Time);
 	//
 	sql_query = `SELECT M.Time FROM Reserve AS R, Matches AS M
                WHERE R.UserID = "${uid}" AND R.MatchID != "${mid}" AND M.ID = R.MatchID;`;
 	executed = await applyQuery(sql_query);
-	for (let i = 0; i < executed.length; i++) {
-		const time = new Date(executed[i].Time);
-		// Differnece in minutes
-		let diff = Math.abs(time - matchTime) / 1000 / 60;
-		if (diff < 120) {
-			return res.status(400).json({
-				meta: {
-					status: 400,
-					msg: "BAD_REQUEST",
-				},
-				res: {
-					error: "You have another conflicting match",
-					data: "",
-				},
-			});
-		}
-	}
+  //
+  if (await CheckConflictingTimes(executed, matchTime, 120)) {
+    return res.status(500).json({msg: 'you have another conflicting match'});
+  }
 
 	// get maxSeats
 	sql_query = `SELECT S.NumRows * S.NumSeatsPerRow as MaxSeats
-               FROM Stadiums AS S, Matches AS M
-               WHERE M.ID = "${mid}" AND M.StadiumID = S.ID;`;
+               FROM Stadiums AS S JOIN Matches AS M ON S.ID = M.StadiumID
+               WHERE M.ID = "${mid}";`;
 	executed = await applyQuery(sql_query);
 	const maxSeats = executed[0].MaxSeats;
 	// console.log(maxSeats);
 
-	// get reserved seats
+  // get reserved seats
 	sql_query = `SELECT SeatNo FROM Reserve WHERE Reserve.MatchID = "${mid}";`;
 	executed = await applyQuery(sql_query);
-	// store reserved seats in a set
 	let reservedSeats = new Set();
 	for (let i = 0; i < executed.length; i++) {
 		reservedSeats.add(executed[i].SeatNo);
@@ -403,19 +382,10 @@ router.post("/:Username/:id/seats", isAuthorized(allEndpoints.reserve), async (r
 	}
 	//
 	if (Fail) {
-		return res.status(400).json({
-			meta: {
-				status: 400,
-				msg: "BAD_REQUEST",
-			},
-			res: {
-				error: "Not all requested seats are available",
-				data: "",
-			},
-		});
-	}
+		return res.status(400).json({msg: "Not all requested seats are available"});
+  }
 
-	// loop on json object seats
+	// Reserve
 	for (let i = 0; i < seats.length; i++) {
 		let seatNo = seats[i];
 		let sql_query = `INSERT INTO Reserve (UserID, MatchID, SeatNo)
@@ -428,30 +398,19 @@ router.post("/:Username/:id/seats", isAuthorized(allEndpoints.reserve), async (r
 
 // Cancel reservation
 // Same Format as reserve
-router.delete("/:Username/:id/seats/", isAuthorized(allEndpoints.reserve), async (req, res) => {
+router.delete("/:id/seats/", isAuthorized(allEndpoints.reserve), async (req, res) => {
 
 	const mid = req.params.id;
-  const username = req.params.Username;
+  const username = await getUsernameFromToken(req);
 	const seats = req.body.seats;
-	if (seats.length == 0) {
-		return res.status(400).json({
-			meta: {
-				status: 400,
-				msg: "BAD_REQUEST",
-			},
-			res: {
-				error: "Empty request",
-				data: "",
-			},
-		});
-	}
+	if (!seats or seats.length == 0) {
+		return res.status(400).json({msg: "Empty request"});
+  }
 
 	let sql_query = `SELECT ID FROM Users WHERE Username = "${username}";`;
 	let executed = await applyQuery(sql_query);
 	const uid = executed[0].ID;
 	// const uid = 1;
-
-	// User has no conflicting match!
 
 	// get reserved seats by this user
 	sql_query = `SELECT SeatNo FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}";`;
@@ -469,22 +428,12 @@ router.delete("/:Username/:id/seats/", isAuthorized(allEndpoints.reserve), async
 	}
 	//
 	if (Fail) {
-		return res.status(400).json({
-			meta: {
-				status: 400,
-				msg: "BAD_REQUEST",
-			},
-			res: {
-				error: "Not all requested seats are reserved by this user",
-				data: "",
-			},
-		});
-	}
+		return res.status(400).json({msg: "Not all requested seats are reserved by this user"});
+  }
 
-	// loop on json object seats
+  // Cancel Reservations
 	for (let i = 0; i < seats.length; i++) {
 		let seatNo = seats[i];
-		// Delete
 		let sql_query = `DELETE FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}" AND SeatNo = "${seatNo}";`;
 		let executed = await applyQuery(sql_query);
 	}
@@ -535,6 +484,19 @@ const CheckConflictingTimes = async (ex, t2, minutes) => {
   return false;
 }
 
+const getUsernameFromToken = async (req) => {
+  let username = null;
+  if (req.headers.authorization) {
+    const token = req.headers.authorization.split(' ')[1];
+    if (token) {
+      const decoded = jwt.verify(token, process.env.KEY);
+      if (decoded && decoded.username) {
+        username = decoded.username.toString();
+      }
+    }
+  }
+  return username;
+}
 
 
 const applyQuery = (query) => {
@@ -551,4 +513,4 @@ const applyQuery = (query) => {
 	});
 };
 
-module.exports = router;
+module.exports = router
