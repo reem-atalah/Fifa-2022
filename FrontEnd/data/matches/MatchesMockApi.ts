@@ -1,9 +1,8 @@
 import axios from "axios";
-import Match from "../../features/match/domain/Match";
 
-export async function getAllMatches() {
+export async function getAllMatches(headers: any) {
 	return axios
-		.get("http://localhost:8080/matches")
+		.get("http://localhost:8080/matches", { headers })
 		.then((res) => {
 			return res.data;
 		})
@@ -13,18 +12,22 @@ export async function getAllMatches() {
 		});
 }
 
-export async function createMatch(params: any) {
+export async function createMatch(params: any, headers: any) {
 	return axios
-		.post("http://localhost:8080/matches", { ...params })
+		.post("http://localhost:8080/matches", { ...params }, { headers })
 		.then((res) => {
 			console.log(res);
 			return res.data;
 		});
 }
 
-export async function updateMatch(params: any) {
+export async function updateMatch(params: any, headers: any) {
 	return axios
-		.put(`http://localhost:8080/matches/${params.ID}`, { ...params })
+		.put(
+			`http://localhost:8080/matches/${params.ID}`,
+			{ ...params },
+			{ headers }
+		)
 		.then((res) => {
 			console.log(res);
 			return true;

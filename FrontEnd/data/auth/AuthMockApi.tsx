@@ -1,6 +1,6 @@
 import axios from "axios";
-import User from "../../models/User";
-// import { Gender, Role } from "../../types";
+// import User from "../../models/User";
+import { Role } from "../../types";
 
 export async function login(username: string, password: string) {
 	return axios
@@ -9,20 +9,16 @@ export async function login(username: string, password: string) {
 			Password: password,
 		})
 		.then((res) => {
-			const userData = res.data[0];
-			return { id: userData["Username"], ...userData };
-
-			// return new User(
-			// 	userData["Username"],
-			// 	userData["FirstName"],
-			// 	userData["LastName"],
-			// 	new Date(userData["BirthDate"]),
-			// 	userData["Gender"],
-			// 	userData["Email"],
-			// 	userData["Role"],
-			// 	userData["Password"],
-			// 	userData["Nationality"]
-			// );
+			console.log(res);
+			const userData = res.data;
+			return {
+				id: userData.id,
+				name: userData.name,
+				email: userData.email,
+				role: Role[userData.role as keyof typeof Role],
+				token: userData.token,
+			};
+			// return { id: userData["Username"], ...userData };
 		})
 		.catch((err) => {
 			console.log(err);
@@ -30,35 +26,25 @@ export async function login(username: string, password: string) {
 		});
 }
 
-export default class AuthMockApi {
-	public async login(username: string, password: string): Promise<User | null> {
-		return axios
-			.post("http://localhost:8080/login", {
-				Username: username,
-				Password: password,
-			})
-			.then((res) => {
-				const userData = res.data[0];
-				return { id: userData["Username"], ...userData };
-
-				// return new User(
-				// 	userData["Username"],
-				// 	userData["FirstName"],
-				// 	userData["LastName"],
-				// 	new Date(userData["BirthDate"]),
-				// 	userData["Gender"],
-				// 	userData["Email"],
-				// 	userData["Role"],
-				// 	userData["Password"],
-				// 	userData["Nationality"]
-				// );
-			})
-			.catch((err) => {
-				console.log(err);
-				return null;
-			});
-	}
-	public register(): void {}
-	public logout(): void {}
-	// remaining functionalities
+export async function register(values: any) {
+	return axios
+		.post("http://localhost:8080/register", {
+			FirstName: values.firstName,
+			LastName: values.lastName,
+			Email: values.email,
+			Password: values.password,
+			Username: values.username,
+			Birthdate: values.birthDate,
+			Gender: values.gender,
+			Nationality: values.nationality,
+			Role: values.requestManagement ? Role.PendingManager : Role.Fan,
+		})
+		.then((res) => {
+			console.log(res);
+			return { success: true, error: "" };
+		})
+		.catch((err) => {
+			console.log(err);
+			return { success: false, error: err };
+		});
 }

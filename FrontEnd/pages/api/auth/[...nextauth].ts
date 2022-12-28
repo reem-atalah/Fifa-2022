@@ -1,7 +1,6 @@
 import NextAuth from "next-auth/next";
 import Credentials from "next-auth/providers/credentials";
 import { login } from "../../../data/auth/AuthMockApi";
-import axios from "axios";
 import { NextAuthOptions } from "next-auth";
 export const authOptions: NextAuthOptions = {
 	providers: [
@@ -33,13 +32,14 @@ export const authOptions: NextAuthOptions = {
 		jwt: async ({ token, user }) => {
 			if (user) {
 				token.id = user.id;
-				token.data = user;
+				token.role = user.role;
+				token.token = user.token;
+				token.user = user;
 			}
 			return Promise.resolve(token);
 		},
 		session: async ({ session, token }) => {
-			(session.user as any) = token.data;
-			console.log(session);
+			(session.user as any) = token.user;
 			return Promise.resolve(session);
 		},
 	},

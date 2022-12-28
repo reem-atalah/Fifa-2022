@@ -6,7 +6,7 @@ import SelectInput from "../InputFields/SelectInput/SelectInput";
 import validateMatchForm from "../../utils/validateMatchForm";
 import { createMatch, updateMatch } from "../../data/matches/MatchesMockApi";
 import { useRouter } from "next/router";
-import moment from "moment";
+import { useSession } from "next-auth/react";
 
 type Props = {
 	teams: any;
@@ -16,16 +16,22 @@ type Props = {
 };
 
 const MatchForm = ({ teams, stadiums, createNew, initialValues }: Props) => {
+	const { data: session, status } = useSession({ required: true });
 	const [error, setError] = useState("");
 	const router = useRouter();
+	if (status === "loading")
+		return <div className="m-auto text-center">Loading ... </div>;
 
 	const handleSubmit = async (values: any, props: any) => {
 		const { Date: date, Time: time, ...params } = values;
-		console.log(params);
+		// console.log(params);
+		console.log(session.user?.token);
 		params.Time = new Date(`${date} ${time}:00`).toLocaleString("sv-SE");
-
+		const headers = {
+			Authorization: `Bearer ${session.user?.token}`,
+		};
 		if (createNew) {
-			createMatch(params)
+			createMatch(params, headers)
 				.then((res) => {
 					router.push("/matches");
 				})
@@ -34,16 +40,7 @@ const MatchForm = ({ teams, stadiums, createNew, initialValues }: Props) => {
 					setError("Something went wrong");
 				});
 		} else {
-			// const { initialValues } = props;
-			// let valuesToSend: any = {};
-			// values.forEach(({ key, value }: any) => {
-			// 	if (initialValues[key] !== value) {
-			// 		valuesToSend[key] = value;
-			// 	}
-			// });
-			// if (valuesToSend) {
-			console.log(values);
-			updateMatch(params)
+			updateMatch(params, headers)
 				.then((res) => {
 					router.push("/matches");
 				})

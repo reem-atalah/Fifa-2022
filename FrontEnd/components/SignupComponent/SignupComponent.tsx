@@ -1,38 +1,22 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import axios from "axios";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import TextInput from "../InputFields/TextInput/TextInput";
 import RadioInput from "../InputFields/RadioInput/RadioInput";
 import validateSignup from "../../utils/validateSignup";
-import { Role } from "../../types";
 import styles from "./SignupComponent.module.css";
+import { register } from "../../data/auth/AuthMockApi";
 const SignupComponent = () => {
 	const router = useRouter();
 	const [error, setError] = useState("");
-	
-	const handleSubmit = (values: any) => {
-		axios
-			.post("http://localhost:8080/register", {
-				FirstName: values.firstName,
-				LastName: values.lastName,
-				Email: values.email,
-				Password: values.password,
-				Username: values.username,
-				Birthdate: values.birthDate,
-				Gender: values.gender,
-				Nationality: values.nationality,
-				Role: Role.fan,
-			})
-			.then((res) => {
-				console.log(res);
-				setError("");
-				router.push("/signin");
-			})
-			.catch((err) => {
-				console.log(err);
-				setError(err.response.data);
-			});
+
+	const handleSubmit = async (values: any) => {
+		const { success, responseErr }: any = await register(values);
+		if (success) {
+			router.push("/signin");
+		} else {
+			setError(responseErr);
+		}
 	};
 
 	return (
@@ -48,6 +32,7 @@ const SignupComponent = () => {
 				gender: "",
 				role: "",
 				nationality: "",
+				requestManagement: false,
 			}}
 			validate={validateSignup}
 			onSubmit={handleSubmit}
@@ -114,6 +99,10 @@ const SignupComponent = () => {
 						value="Female"
 					/>
 					<RadioInput label="Male" name="gender" type="radio" value="Male" />
+				</div>
+				<div className="flex items-center gap-2 p-2">
+					<Field type="checkbox" name="requestManagement" className="w-4 h-4"/>
+					<label>Request to be a Manager</label>
 				</div>
 				<button type="submit" className="form--submit">
 					Sign Up

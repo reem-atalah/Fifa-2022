@@ -39,13 +39,17 @@ export default function Matches({ matches, showControl }: Props) {
 export async function getServerSideProps(context: any) {
 	const session = await getSession(context);
 	// Fetch data from external API
-	const data = await getAllMatches();
+	const data = await getAllMatches({
+		Authorization: `Bearer ${session?.user?.token}`,
+	});
 	data.matches.forEach((match: any) => {
 		const time = new Date(match.Time);
 		match.matchTime = time.toLocaleTimeString("sv-SE");
 		match.matchDate = time.toLocaleDateString("sv-SE");
 	});
+	const showControl =
+		session?.user?.role === Role.Manager || session?.user?.role === Role.Admin;
 	return {
-		props: { ...data, showControl: session?.user?.Role === Role.manager }, // will be passed to the page component as props
+		props: { ...data, showControl }, // will be passed to the page component as props
 	};
 }

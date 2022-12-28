@@ -6,7 +6,6 @@ import { getAllStadiums } from "../../../data/stadiums/StadiumMockApi";
 import { Role } from "../../../types";
 import Header from "../../../components/Header/Header";
 const edit = ({ teams, stadiums, ...props }: any) => {
-	console.log(props);
 	return (
 		<>
 			<Header />
@@ -25,14 +24,17 @@ export default edit;
 
 export async function getServerSideProps(context: any) {
 	const session = await getSession(context);
-	if (!session) {
+	if (!session || !session.user || !session.user.token) {
 		return {
 			redirect: {
 				permanent: false,
 				destination: "/signin",
 			},
 		};
-	} else if (session?.user?.Role !== Role.manager) {
+	} else if (
+		session?.user?.role !== Role.Manager &&
+		session?.user?.role !== Role.Admin
+	) {
 		return {
 			redirect: {
 				permanent: false,
@@ -40,7 +42,6 @@ export async function getServerSideProps(context: any) {
 			},
 		};
 	}
-	// console.log(context.query);
 	if (!context.query.ID) {
 		return {
 			redirect: {

@@ -3,11 +3,11 @@ export const enum Gender {
 	female = "Female",
 }
 
-export const enum Role {
-	admin = "0",
-	manager = "1",
-	pendingManager = "2",
-	fan = "3",
+export enum Role {
+	Admin = "0",
+	Manager = "1",
+	PendingManager = "2",
+	Fan = "3",
 }
 
 export type Stadium = {

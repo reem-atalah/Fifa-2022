@@ -5,13 +5,24 @@ import { signOut } from "next-auth/react";
 const AuthStatusComponent = () => {
 	const session = useSession();
 	if (session.status === "loading") return <div>Loading...</div>;
-	if (session.status === "authenticated"){
+	if (session.status === "authenticated") {
 		return (
 			<>
-			<div className="flex flex-row gap-4 flex-wrap">
-			<Link href={`/users/${session?.data?.user?.Username}`} className="text-white font-bold m-auto">{session?.data?.user?.Username}</Link> {/* leave it with error */}
-			<button className="px-4 py-2 border-2 rounded text-white font-bold"  onClick={(e) => signOut({ redirect: false })}>Sign Out</button>
-			</div>
+				<div className="flex flex-row gap-4 flex-wrap">
+					<Link
+						href={`/users/${session?.data?.user?.name}`}
+						className="text-white font-bold m-auto"
+					>
+						{session?.data?.user?.name}
+					</Link>{" "}
+					{/* leave it with error */}
+					<button
+						className="px-4 py-2 border-2 rounded text-white font-bold"
+						onClick={(e) => signOut({ redirect: false })}
+					>
+						Sign Out
+					</button>
+				</div>
 			</>
 		);
 	}

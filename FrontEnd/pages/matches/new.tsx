@@ -31,14 +31,17 @@ export default NewMatch;
 export async function getServerSideProps(context: GetServerSidePropsContext) {
 	// Fetch data from external API
 	const session = await getSession(context);
-	if (!session) {
+	if (!session || !session.user || !session.user.token) {
 		return {
 			redirect: {
 				permanent: false,
 				destination: "/signin",
 			},
 		};
-	} else if (session?.user?.Role !== Role.manager) {
+	} else if (
+		session?.user?.role !== Role.Manager &&
+		session?.user?.role !== Role.Admin
+	) {
 		return {
 			redirect: {
 				permanent: false,
