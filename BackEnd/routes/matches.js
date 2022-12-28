@@ -109,12 +109,6 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
         },
       });
     }
-    // TODO: check conflicting Referee or Linesmen have another match at this time
-
-    // TODO: check if conflicting in choosing same person to multiple poitions in same match
-    if (Referee == Linesman1 || Referee == Linesman2 || Linesman1 == Linesman2) {
-      return res.status(401).send("Referees and Linesmen must be different");
-    }
 
     // Teams Have conflicting matches
     var sql_query1 = `SELECT Time from Matches where Team1 = "${Team1}" or Team2 = "${Team1}" or Team1 = "${Team2}" or Team2 = "${Team2}";`
