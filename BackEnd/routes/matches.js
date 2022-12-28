@@ -124,12 +124,12 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch),
     }
 
     // Teams Have conflicting matches
-    if (await checkConflictingMatchesTeams(Team1, Team2, Time)) {
+    if (await CheckConflictingMatchesTeams(Team1, Team2, Time)) {
       return res.status(500).json({ msg: 'Teams have conflicting matches' });
     }
 
     // Conflict in Stadium
-    if (await checkConflictingMatchesStadium(StadiumID, Time)) {
+    if (await CheckConflictingMatchesStadium(StadiumID, Time)) {
       return res.status(500).json({ msg: 'Stadium has conflicting matches' });
     }
 
@@ -272,11 +272,15 @@ router.delete('/:id',isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
 
   let sql_query = `DELETE FROM Matches where ID = "${id}";`
   try {
-    await applyQuery(sql_query);
+    let ex = await applyQuery(sql_query);
+    console.log(ex);
+    if (ex.affectedRows == 0)
+      return res.status(404).json({msg: "Match Not Found"});
+    return res.status(200).json({msg: "Match Deleted Successfully"});
   }
   catch (e) {
     console.log(e);
-    return res.status(400).send("No match found with this ID");
+    return res.status(500).send(e);
   }
 });
 
