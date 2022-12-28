@@ -5,10 +5,7 @@ var db = require('../db');
 router.get('/', async (req, res) => {
 
   // check if the user isn't already logged in
-  if(global_username = "")
-  {
-    return res.status(200).json();
-  }
+
   return res.status(404).json("You're arleady logged in!")
 
 });
@@ -26,8 +23,8 @@ router.post('/', async (req, res) => {
   var Nationality = req.body.Nationality;
   var Role = req.body.Role;
 
-  console.log(`Data: ${FirstName}, ${LastName}, ${Username}, ${Password}, ${Email},\
-         ${Birthdate}, ${Gender}, ${Nationality}, ${Role}`);
+  // console.log(`Data: ${FirstName}, ${LastName}, ${Username}, ${Password}, ${Email},\
+  //        ${Birthdate}, ${Gender}, ${Nationality}, ${Role}`);
   
   //  TODO: Check important(FN, LN, UN, Pass, Email) null values
   if(!FirstName)
@@ -45,7 +42,7 @@ router.post('/', async (req, res) => {
   }
   var sql_query_email = `SELECT Password from Users where Email = "${Email}";`
   var executed_email = await applyQuery(sql_query_email);
-  if(executed_email)
+  if(executed_email.length != 0)
   {
     return res.status(401).json("Email is arleady in use");
   }

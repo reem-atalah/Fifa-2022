@@ -1,5 +1,6 @@
 const router = require("express").Router();
-
+const isAuthorized = require('../Configurations//isAuthorized');
+const allEndpoints=require('./endpoints');
 var db = require("../db");
 
 // SQL injection? what's that?
@@ -20,10 +21,11 @@ router.get("/", async (req, res) => {
 });
 
 // Getting Match info with the stadium
-// GET /matches/:id
-router.get('/:id', async (req, res) => {
+// GET /matches/:Username/:id
+router.get('/:Username/:id', async (req, res) => {
 
   const ID = req.params.id;
+  const username = req.params.Username;
 
   // var sql_query1 = `SELECT * from Matches where ID = "${ID}";
   var sql_query1 = `
@@ -46,11 +48,11 @@ router.get('/:id', async (req, res) => {
 
     let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
     join Users on UserID = ID
-    where MatchID = ${ID} and Username = "${global_username}";`;
+    where MatchID = ${ID} and Username = "${username}";`;
 
     let sql_query_not_user_seats = `SELECT  SeatNo FROM Reserve 
     join Users on UserID = ID
-    where MatchID = ${ID} and Username != "${global_username}" ;`;
+    where MatchID = ${ID} and Username != "${username}" ;`;
 
     let executed2 = await applyQuery(sql_query_user_sets);
     let executed3 = await applyQuery(sql_query_not_user_seats);
@@ -75,12 +77,9 @@ router.get('/:id', async (req, res) => {
 });
 
 // Creating a match
-router.post('/', async (req, res) => {
+router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
+ async (req, res) => {
 
-  // Authourization
-  if (global_type != "Admin" && global_type != "Manager") {
-    return res.status(401).send("Unauthorized");
-  }
 
   // TODO: check for null values
   // TODO: check for invalid values :O
@@ -190,7 +189,6 @@ router.post('/', async (req, res) => {
 
       var sql_query1 = `SELECT * from Matches where ID = "${id}";`
       var executed1 = await applyQuery(sql_query1);
-      // console.log(executed1);
 
       return res.status(200).json(executed1);
     }
@@ -202,11 +200,8 @@ router.post('/', async (req, res) => {
 });
 
 // Updating a match
-router.put('/:id', async (req, res) => {
-
-  if (global_type != "Admin" && global_type != "Manager") {
-    return res.status(401).send("Unauthorized");
-  }
+router.put('/:id', isAuthorized(allEndpoints.AuthMatch),
+async (req, res) => {
 
   const id = req.params.id;
 
@@ -251,7 +246,7 @@ router.put('/:id', async (req, res) => {
   if (sql_query.endsWith(', ')) {
     sql_query = sql_query.slice(0, -2);
     sql_query += ` WHERE ID = "${id}";`;
-    //
+    
     try {
       var executed = await applyQuery(sql_query);
       if (executed) {
@@ -280,11 +275,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete a match
-router.delete('/:id', async (req, res) => {
-
-  if (global_type != "Admin" && global_type != "Manager") {
-    return res.status(401).send("Unauthorized");
-  }
+router.delete('/:id',isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
 
   const id = req.params.id;
 
@@ -299,14 +290,8 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Seats status
-router.get("/:id/seats", async (req, res) => {
-	// if (global_type != "Admin" && global_type != "Manager") {
-	//  return res.status(401).send("Unauthorized");
-	//
+router.get("/:id/seats",isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
 
-  if (global_type != "Admin" && global_type != "Manager") {
-   return res.status(401).send("Unauthorized");
-  }
 	const id = req.params.id;
 
 	// get max seats
@@ -346,25 +331,10 @@ router.get("/:id/seats", async (req, res) => {
 
 // Reserve vacant seats
 // parameters -> seat number
-router.post("/:id/seats", async (req, res) => {
-	if (
-		global_type != "Admin" &&
-		global_type != "Manager" &&
-		global_type != "Fan"
-	) {
-		return res.status(401).json({
-			meta: {
-				status: 401,
-				msg: "UNAUTHORIZED",
-			},
-			res: {
-				error: "Log in to use this feature",
-				data: "",
-			},
-		});
-	}
+router.post("/:Username/:id/seats", isAuthorized(allEndpoints.reserve), async (req, res) => {
 
 	const mid = req.params.id;
+  const username = req.params.Username;
 	const seats = req.body.seats;
 	// console.log(seats)
 	if (seats.length == 0) {
@@ -380,8 +350,7 @@ router.post("/:id/seats", async (req, res) => {
 		});
 	}
 
-	console.log("nameeeeeeee: " + global_username);
-	var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
+	var sql_query = `SELECT ID FROM Users WHERE Username = "${username}";`;
 	var executed = await applyQuery(sql_query);
 	const uid = executed[0].ID;
 	// const uid = 1;
@@ -464,27 +433,11 @@ router.post("/:id/seats", async (req, res) => {
 
 // Cancel reservation
 // Same Format as reserve
-router.delete("/:id/seats/", async (req, res) => {
-	if (
-		global_type != "Admin" &&
-		global_type != "Manager" &&
-		global_type != "Fan"
-	) {
-		return res.status(401).json({
-			meta: {
-				status: 401,
-				msg: "UNAUTHORIZED",
-			},
-			res: {
-				error: "Log in to use this feature",
-				data: "",
-			},
-		});
-	}
+router.delete("/:Username/:id/seats/", isAuthorized(allEndpoints.reserve), async (req, res) => {
 
 	const mid = req.params.id;
+  const username = req.params.Username;
 	const seats = req.body.seats;
-	// console.log(seats)
 	if (seats.length == 0) {
 		return res.status(400).json({
 			meta: {
@@ -498,8 +451,7 @@ router.delete("/:id/seats/", async (req, res) => {
 		});
 	}
 
-	console.log("nameeeeeeee: " + global_username);
-	var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
+	var sql_query = `SELECT ID FROM Users WHERE Username = "${username}";`;
 	var executed = await applyQuery(sql_query);
 	const uid = executed[0].ID;
 	// const uid = 1;

@@ -1,17 +1,17 @@
 const express = require('express');
 const path = require('path');
-// const ejs = require('ejs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
- 
 const fileUpload = require('express-fileupload');
-
+const dotenv = require('dotenv');
 const session = require('express-session');
 const flush = require('connect-flash');
 const app = express();
 
 const port = process.env.PORT || 8080;
+
+// Set up Global configuration access
+dotenv.config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -54,10 +54,9 @@ app.use('/home', require('./BackEnd/routes/home'));
 app.use('/users', require('./BackEnd/routes/users'));
 app.use('/team', require('./BackEnd/routes/team'));
 app.use('/editUser', require('./BackEnd/routes/editUser'));
+app.use('/deleteUser', require('./BackEnd/routes/deleteUser'));
 app.use('/stadium', require('./BackEnd/routes/stadium'));
 
-global.global_username = "";
-global.global_type = "None";
 
 app.listen(port,(error)=>{ 
     if(error) return console.log(error);

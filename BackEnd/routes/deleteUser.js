@@ -1,16 +1,13 @@
 const router = require('express').Router();
-
+const isAuthorized = require('../Configurations//isAuthorized');
+const allEndpoints=require('./endpoints');
 var db = require('../db');
 
+// delete user by admin only
+router.delete('/:Username', isAuthorized(allEndpoints.AuthUser),
+ async (req, res) => {
 
-router.post('/', async (req, res) => {
-
-    // check that the user is an admin so he can delete other user
-    if (global_type != "Admin") {
-        return res.status(401).json('You are not an admin, You are not allowed to access this page');
-    }
-
-    var username = req.body.Username;
+    var username = req.params.Username;
     var sql_query1 = `DELETE FROM Users where Username = "${username}";`
 
     try {
