@@ -1,6 +1,6 @@
 
 const roles = Object.freeze({
-    MANGER: 'Manager',
+    MANAGER: 'Manager',
     ADMIN: 'Admin',
     FAN: 'Fan',
   });
