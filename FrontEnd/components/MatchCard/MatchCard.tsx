@@ -5,11 +5,9 @@ import { TbRectangleVertical } from "react-icons/tb";
 import { MdPlace, MdEdit } from "react-icons/md";
 import Link from "next/link";
 const MatchCard = ({ match }: any) => {
-	const matchTime = new Date(match.Time).toLocaleTimeString("en-US");
-	const matchDate = new Date(match.Time).toLocaleDateString();
 	return (
 		<div className={styles["match-card"]}>
-			<Link href="/matches/edit" className={styles['edit-icon']}>
+			<Link href="/matches/edit" className={styles["edit-icon"]}>
 				<MdEdit />
 			</Link>
 			<div className={styles["match-card__header"]}>
@@ -25,8 +23,8 @@ const MatchCard = ({ match }: any) => {
 				</div>
 				<p>at:</p>
 				<div className={styles["date-time"]}>
-					<p>{matchDate}</p>
-					<p>{matchTime}</p>
+					<p>{match.matchDate}</p>
+					<p>{match.matchTime}</p>
 				</div>
 			</div>
 			<div className={styles["match-card__content"]}>

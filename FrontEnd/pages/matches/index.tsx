@@ -30,6 +30,11 @@ export default function Matches({ matches }: Props) {
 export async function getStaticProps() {
 	// Fetch data from external API
 	const data = await getAllMatches();
+	data.matches.forEach((match: any) => {
+		const time = new Date(match.Time);
+		match.matchTime = time.toLocaleTimeString("en-US");
+		match.matchDate = time.toLocaleDateString();
+	});
 	return {
 		props: { ...data }, // will be passed to the page component as props
 	};
