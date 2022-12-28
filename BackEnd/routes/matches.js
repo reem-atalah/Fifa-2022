@@ -76,7 +76,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Creating a match
-router.post('/', isAuthorized(allEndpoints.AuthMatch),
+router.post('/', isAuthorized(allEndpoints.manager),
  async (req, res) => {
 
   let StadiumID = req.body.StadiumID;
@@ -146,7 +146,7 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch),
 });
 
 // Updating a match
-router.put('/:id', isAuthorized(allEndpoints.AuthMatch),
+router.put('/:id', isAuthorized(allEndpoints.manager),
 async (req, res) => {
 
   const id = req.params.id;
@@ -279,7 +279,7 @@ match, have conflicting matches with the new time'});
 });
 
 // Delete a match
-router.delete('/:id',isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
+router.delete('/:id',isAuthorized(allEndpoints.manager), async (req, res) => {
 
   const id = req.params.id;
 
@@ -342,7 +342,7 @@ router.get("/:id/seats", async (req, res) => {
 
 // Reserve vacant seats
 // parameters -> seat number
-router.post("/:id/seats", isAuthorized(allEndpoints.reserve), async (req, res) => {
+router.post("/:id/seats", isAuthorized(allEndpoints.fan), async (req, res) => {
 
 	const mid = req.params.id;
   const username = await getUsernameFromToken(req);
@@ -415,7 +415,7 @@ router.post("/:id/seats", isAuthorized(allEndpoints.reserve), async (req, res) =
 
 // Cancel reservation
 // Same Format as reserve
-router.delete("/:id/seats/", isAuthorized(allEndpoints.reserve), async (req, res) => {
+router.delete("/:id/seats/", isAuthorized(allEndpoints.fan), async (req, res) => {
 
 	const mid = req.params.id;
   const username = await getUsernameFromToken(req);

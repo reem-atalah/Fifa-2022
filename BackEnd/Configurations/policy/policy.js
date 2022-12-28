@@ -1,4 +1,3 @@
-
 const roles = require('../roles');
 const fanPolicies = require('./fan');
 const adminPolicies = require('./admin');

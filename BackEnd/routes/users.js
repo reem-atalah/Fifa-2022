@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
 });
 
 // get user profile
-router.get("/:username", isAuthorized(allEndpoints.userProfile), async (req, res) => {
+router.get("/:username", isAuthorized(allEndpoints.fan), async (req, res) => {
 	const username = req.params.username;
 	// console.log('Getting Match with id: ' + ID);
 
@@ -48,7 +48,7 @@ router.get("/:username", isAuthorized(allEndpoints.userProfile), async (req, res
 });
 
 // update role of user, by admin only
-router.put("/:username", isAuthorized(allEndpoints.AuthUser), async (req, res) => {
+router.put("/:username", isAuthorized(allEndpoints.admin), async (req, res) => {
 	const username = req.params.username;
 
 	// TODO: check for null values
@@ -95,7 +95,7 @@ router.put("/:username", isAuthorized(allEndpoints.AuthUser), async (req, res) =
 });
 
 // delete user by himself
-router.delete("/:username", isAuthorized(allEndpoints.AuthUser), async (req, res) => {
+router.delete("/:username", isAuthorized(allEndpoints.fan), async (req, res) => {
 	const username = req.params.username;
 
 	var sql_query = `DELETE FROM Users where username = "${username}";`;
