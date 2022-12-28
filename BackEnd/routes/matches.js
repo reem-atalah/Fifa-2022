@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const router = require("express").Router();
 const isAuthorized = require('../Configurations//isAuthorized');
 const allEndpoints=require('./endpoints');
@@ -21,13 +22,23 @@ router.get("/", async (req, res) => {
 });
 
 // Getting Match info with the stadium
-// GET /matches/:Username/:id
-router.get('/:Username/:id', async (req, res) => {
+// GET /matches/:id
+router.get('/:id', async (req, res) => {
 
   const ID = req.params.id;
-  const username = req.params.Username;
 
-  // var sql_query1 = `SELECT * from Matches where ID = "${ID}";
+  // Getting username from token
+  var username = null;
+  if (req.headers.authorization) {
+    const token = req.headers.authorization.split(' ')[1];
+    if (token) {
+      const decoded = jwt.verify(token, process.env.KEY);
+      if (decoded && decoded.username) {
+        username = decoded.username.toString();
+      }
+    }
+  }
+
   var sql_query1 = `
   SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, s.NumRows as Number_Rows, s.NumSeatsPerRow as NumSeatsPerRow, 
   t1.Name as Team1Name, t2.Name as Team2Name, t1.picture as Team1Picture, t2.picture as Team2Picture
@@ -35,30 +46,41 @@ router.get('/:Username/:id', async (req, res) => {
   left join stadiums as s on m.StadiumID = s.ID
   left join teams as t1 on m.Team1 = t1.ID
   left join teams as t2 on m.Team2 = t2.ID
-  where m.ID = ${ID} ;`;
+  where m.ID = ${ID};`;
 
 	try {
 		var executed1 = await applyQuery(sql_query1);
 		// No Matches Found
 		if (executed1.length == 0) {
-			return res.status(400).json("No match found with given ID");
-		}
+      return res.status(500).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
+        'res': {
+          'error': 'No match found with given ID',
+          'data': '',
+        },
+      });
+    }
 		let matchObject = executed1[0];
 
-		let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
-    join Users on UserID = ID
-    where MatchID = ${ID} and Username = "${username}";`;
+    // User's seats
+    userSeatsList = [];
+    if (username != null) {
+      let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
+      join Users on UserID = ID
+      where MatchID = ${ID} and Username = "${username}";`;
+      let executed2 = await applyQuery(sql_query_user_sets);
+      for (seat in executed2) userSeatsList.push(executed2[seat]["SeatNo"]);
+    }
 
-		let sql_query_not_user_seats = `SELECT  SeatNo FROM Reserve 
+    // Others' seats
+    nonUserSeatList = [];
+		let sql_query_not_user_seats = `SELECT SeatNo FROM Reserve 
     join Users on UserID = ID
     where MatchID = ${ID} and Username != "${username}" ;`;
-
-		let executed2 = await applyQuery(sql_query_user_sets);
 		let executed3 = await applyQuery(sql_query_not_user_seats);
-
-		userSeatsList = [];
-		nonUserSeatList = [];
-		for (seat in executed2) userSeatsList.push(executed2[seat]["SeatNo"]);
 		for (seat in executed3) nonUserSeatList.push(executed3[seat]["SeatNo"]);
 
 		matchObject["UserList"] = userSeatsList;
@@ -73,12 +95,9 @@ router.get('/:Username/:id', async (req, res) => {
 });
 
 // Creating a match
-router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
+router.post('/', isAuthorized(allEndpoints.AuthMatch),
  async (req, res) => {
 
-
-  // TODO: check for null values
-  // TODO: check for invalid values :O
   var StadiumID = req.body.StadiumID;
   var Time = req.body.Time;
   var Team1 = req.body.Team1;
@@ -87,27 +106,69 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
   var Linesman1 = req.body.Linesman1;
   var Linesman2 = req.body.Linesman2;
 
-  console.log('Posting to Matches');
-  console.log(`Data: ${Team1} vs ${Team2} at ${StadiumID} at ${Time}, Referees: ${Referee}, ${Linesman1}, ${Linesman2}`);
+  // Valid Names
+  const regex = /^[a-zA-Z][a-zA-Z \-_,]*$/;
+  if (!regex.test(Referee) || !regex.test(Linesman1) || !regex.test(Linesman2)) {
+    return res.status(400).json({
+      'meta': {
+        'status': 400,
+        'msg': 'BAD_REQUEST',
+      },
+      'res': {
+        'error': 'Referee or Linesmen are null or invalid',
+        'data': '',
+      },
+    });
+  }
 
-  // TODO: check conflicting time of teams
+  // check if Time value is DateTime
+  const te = new Date(req.body.Time);
+  if (te == "Invalid Date") {
+    return res.status(400).json({
+      'meta': {
+        'status': 400,
+        'msg': 'Bad_REQUEST',
+      },
+      'res': {
+        'error': 'Can"t Decode Time value as DateTime Object',
+        'data': '',
+      },
+    });
+  }
 
   var sql_query = `INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
         VALUES ("${StadiumID}", "${Time}", "${Team1}", "${Team2}", "${Referee}", "${Linesman1}", "${Linesman2}");`
 
   try {
+    // Duplicate
     if (Team1 == Team2) {
       return res.status(400).json({
         'meta': {
-          'status': 500,
-          'msg': 'INTERNAL_SERVER_ERROR',
+          'status': 400,
+          'msg': 'BAD_REQUEST',
         },
-
         'res': {
           'error': 'Team1 and Team2 cannot be the same',
           'data': '',
         },
       });
+    }
+    // null / invalid
+    for (team of [Team1, Team2]) {
+      var sq = `SELECT * FROM Teams WHERE ID = ${team};`;
+      var ex = await applyQuery(sq);
+      if (ex.length == 0) {
+        return res.status(400).json({
+          'meta': {
+            'status': 400,
+            'msg': 'BAD_REQUEST',
+          },
+          'res': {
+            'error': 'Team1 or Team2 is not valid',
+            'data': '',
+          },
+        });
+      }
     }
 
     // Teams Have conflicting matches
@@ -117,16 +178,14 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
       // handle datetime object from mysql
       var time1 = new Date(executed1[i].Time);
       var time2 = new Date(Time);
-  
       // Differnece in minutes
       var diff = Math.abs(time1 - time2) / 1000 / 60;
       if (diff < 120) {
-        return res.status(400).json({
+        return res.status(500).json({
           'meta': {
             'status': 500,
             'msg': 'INTERNAL_SERVER_ERROR',
           },
-
           'res': {
             'error': 'Teams have conflicting matches',
             'data': '',
@@ -139,12 +198,11 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
     var sql_query2 = `SELECT Time from Matches where StadiumID = "${StadiumID}";`
     var executed2 = await applyQuery(sql_query2);
     if (executed2.length == 0) {
-      return res.status(400).json({
+      return res.status(500).json({
         'meta': {
           'status': 500,
           'msg': 'INTERNAL_SERVER_ERROR',
         },
-
         'res': {
           'error': 'No stadium found with given ID',
           'data': '',
@@ -155,11 +213,10 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
       // handle datetime object from mysql
       var time1 = new Date(executed2[i].Time);
       var time2 = new Date(Time);
-
       // Conflict match time in same Stadium
       var diff = Math.abs(time1 - time2) / 1000 / 60;
       if (diff < 120) {
-        return res.status(400).json({
+        return res.status(500).json({
           'meta': {
             'status': 500,
             'msg': 'INTERNAL_SERVER_ERROR',
@@ -172,8 +229,8 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
       }
     } 
 
+    // Insert new match
     var executed = await applyQuery(sql_query);
-
     if (executed) {
       id = executed.insertId
 
@@ -182,10 +239,13 @@ router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
 
       return res.status(200).json(executed1);
     }
+    else {
+      throw "Error in inserting new match";
+    }
   }
   catch (e) {
     console.log(e)
-    return res.status(400).send(e);
+    return res.status(500).send(e);
   }
 });
 
@@ -236,10 +296,17 @@ async (req, res) => {
   if (sql_query.endsWith(', ')) {
     sql_query = sql_query.slice(0, -2);
     sql_query += ` WHERE ID = "${id}";`;
-    
+    //
     try {
       var executed = await applyQuery(sql_query);
       if (executed) {
+        // sql_query = `SELECT * from Matches where ID = "${id}";`
+        // executed = await applyQuery(sql_query);
+        // // store data as json object
+        // // return updated info
+        // return res.status(200).json({
+        //   ...executed[0]
+        // });
         return res.status(200).json({
           "res": "Match Updated Successfully"
         });
@@ -253,8 +320,8 @@ async (req, res) => {
   else {
     return res.status(400).json({
       'meta': {
-        'status': 500,
-        'msg': 'INTERNAL_SERVER_ERROR',
+        'status': 400,
+        'msg': 'BAD_REQUEST',
       },
       'res': {
         'error': 'No data to update',
