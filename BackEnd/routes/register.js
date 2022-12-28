@@ -4,9 +4,7 @@ var db = require("../db");
 
 router.get("/", async (req, res) => {
 	// check if the user isn't already logged in
-	if ((global_username = "")) {
-		return res.status(200).json();
-	}
+
 	return res.status(404).json("You're arleady logged in!");
 });
 

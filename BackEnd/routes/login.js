@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
 
 var db = require('../db');
 
@@ -41,26 +42,35 @@ router.post('/', async (req, res) => {
       return res.status(401).json("Password is not correct");
     }
 
-    // token
-    global_username = sign_in_Username;
-    switch (executed1[0].Role) {
-      case 0:
-        global_type = "Admin";
-        break;
-      case 1:
-        global_type = "Manager";
-        break;
-      case 2:
-        global_type = "Fan";
-        break;
-      default:
-        global_type = "Fan";
-        break;
-    }
     var sql_query1 = `SELECT * from Users where Username = "${sign_in_Username}";`
     var executed1 = await applyQuery(sql_query1);
 
-    return res.status(200).json(executed1);
+    // map the Role to word
+    type = "Fan"
+    switch (executed1[0].Role) {
+      case "0":
+        type = "Admin";
+        break;
+      case "1":
+        type = "Manager";
+        break;
+      case "2":
+        type = "Fan";
+        break;
+      default:
+        type = "Fan";
+    }
+    
+    const user = executed1[0];
+
+    // token
+    const token = jwt.sign({
+      email: user["Email"],
+      role: type
+    },
+      process.env.KEY);
+
+    return res.status(200).json(token);
   }
   catch (e) {
     console.log(e);

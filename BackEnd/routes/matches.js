@@ -1,5 +1,6 @@
 const router = require("express").Router();
-
+const isAuthorized = require('../Configurations//isAuthorized');
+const allEndpoints=require('./endpoints');
 var db = require("../db");
 
 // SQL injection? what's that?
@@ -20,12 +21,14 @@ router.get("/", async (req, res) => {
 });
 
 // Getting Match info with the stadium
-// GET /matches/:id
-router.get("/:id", async (req, res) => {
-	const ID = req.params.id;
+// GET /matches/:Username/:id
+router.get('/:Username/:id', async (req, res) => {
 
-	// var sql_query1 = `SELECT * from Matches where ID = "${ID}";
-	var sql_query1 = `
+  const ID = req.params.id;
+  const username = req.params.Username;
+
+  // var sql_query1 = `SELECT * from Matches where ID = "${ID}";
+  var sql_query1 = `
   SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, s.NumRows as Number_Rows, s.NumSeatsPerRow as NumSeatsPerRow, 
   t1.Name as Team1Name, t2.Name as Team2Name, t1.picture as Team1Picture, t2.picture as Team2Picture
   FROM matches as m 
@@ -44,11 +47,11 @@ router.get("/:id", async (req, res) => {
 
 		let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
     join Users on UserID = ID
-    where MatchID = ${ID} and Username = "${global_username}";`;
+    where MatchID = ${ID} and Username = "${username}";`;
 
 		let sql_query_not_user_seats = `SELECT  SeatNo FROM Reserve 
     join Users on UserID = ID
-    where MatchID = ${ID} and Username != "${global_username}" ;`;
+    where MatchID = ${ID} and Username != "${username}" ;`;
 
 		let executed2 = await applyQuery(sql_query_user_sets);
 		let executed3 = await applyQuery(sql_query_not_user_seats);
@@ -70,238 +73,215 @@ router.get("/:id", async (req, res) => {
 });
 
 // Creating a match
-router.post("/", async (req, res) => {
-	console.log(global_type);
-	// Authourization
-	// if (global_type != "Admin" && global_type != "Manager") {
-	// 	return res.status(401).send("Unauthorized");
-	// }
+router.post('/', isAuthorized(allEndpoints.AuthMatch) ,
+ async (req, res) => {
 
-	// TODO: check for null values
-	// TODO: check for invalid values :O
-	var StadiumID = req.body.StadiumID;
-	var Time = req.body.Time;
-	var Team1 = req.body.Team1;
-	var Team2 = req.body.Team2;
-	var Referee = req.body.Referee;
-	var Linesman1 = req.body.Linesman1;
-	var Linesman2 = req.body.Linesman2;
 
-	console.log("Posting to Matches");
-	console.log(
-		`Data: ${Team1} vs ${Team2} at ${StadiumID} at ${Time}, Referees: ${Referee}, ${Linesman1}, ${Linesman2}`
-	);
+  // TODO: check for null values
+  // TODO: check for invalid values :O
+  var StadiumID = req.body.StadiumID;
+  var Time = req.body.Time;
+  var Team1 = req.body.Team1;
+  var Team2 = req.body.Team2;
+  var Referee = req.body.Referee;
+  var Linesman1 = req.body.Linesman1;
+  var Linesman2 = req.body.Linesman2;
 
-	// TODO: check conflicting time of teams
+  console.log('Posting to Matches');
+  console.log(`Data: ${Team1} vs ${Team2} at ${StadiumID} at ${Time}, Referees: ${Referee}, ${Linesman1}, ${Linesman2}`);
 
-	var sql_query = `INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
-        VALUES ("${StadiumID}", "${Time}", "${Team1}", "${Team2}", "${Referee}", "${Linesman1}", "${Linesman2}");`;
+  // TODO: check conflicting time of teams
 
-	try {
-		if (Team1 == Team2) {
-			return res.status(400).json({
-				meta: {
-					status: 500,
-					msg: "INTERNAL_SERVER_ERROR",
-				},
+  var sql_query = `INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
+        VALUES ("${StadiumID}", "${Time}", "${Team1}", "${Team2}", "${Referee}", "${Linesman1}", "${Linesman2}");`
 
-				res: {
-					error: "Team1 and Team2 cannot be the same",
-					data: "",
-				},
-			});
-		}
-		// TODO: check conflicting Referee or Linesmen have another match at this time
+  try {
+    if (Team1 == Team2) {
+      return res.status(400).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
 
-		// TODO: check if conflicting in choosing same person to multiple poitions in same match
-		if (
-			Referee == Linesman1 ||
-			Referee == Linesman2 ||
-			Linesman1 == Linesman2
-		) {
-			return res.status(401).send("Referees and Linesmen must be different");
-		}
+        'res': {
+          'error': 'Team1 and Team2 cannot be the same',
+          'data': '',
+        },
+      });
+    }
 
-		// Teams Have conflicting matches
-		var sql_query1 = `SELECT Time from Matches where Team1 = "${Team1}" or Team2 = "${Team1}" or Team1 = "${Team2}" or Team2 = "${Team2}";`;
-		var executed1 = await applyQuery(sql_query1);
-		for (var i = 0; i < executed1.length; i++) {
-			// handle datetime object from mysql
-			var time1 = new Date(executed1[i].Time);
-			var time2 = new Date(Time);
+    // Teams Have conflicting matches
+    var sql_query1 = `SELECT Time from Matches where Team1 = "${Team1}" or Team2 = "${Team1}" or Team1 = "${Team2}" or Team2 = "${Team2}";`
+    var executed1 = await applyQuery(sql_query1);
+    for (var i = 0; i < executed1.length; i++) {
+      // handle datetime object from mysql
+      var time1 = new Date(executed1[i].Time);
+      var time2 = new Date(Time);
+  
+      // Differnece in minutes
+      var diff = Math.abs(time1 - time2) / 1000 / 60;
+      if (diff < 120) {
+        return res.status(400).json({
+          'meta': {
+            'status': 500,
+            'msg': 'INTERNAL_SERVER_ERROR',
+          },
 
-			// Differnece in minutes
-			var diff = Math.abs(time1 - time2) / 1000 / 60;
-			if (diff < 120) {
-				return res.status(400).json({
-					meta: {
-						status: 500,
-						msg: "INTERNAL_SERVER_ERROR",
-					},
+          'res': {
+            'error': 'Teams have conflicting matches',
+            'data': '',
+          },
+        });
+      }
+    }
 
-					res: {
-						error: "Teams have conflicting matches",
-						data: "",
-					},
-				});
-			}
-		}
+    // Conflict in Stadium
+    var sql_query2 = `SELECT Time from Matches where StadiumID = "${StadiumID}";`
+    var executed2 = await applyQuery(sql_query2);
+    if (executed2.length == 0) {
+      return res.status(400).json({
+        'meta': {
+          'status': 500,
+          'msg': 'INTERNAL_SERVER_ERROR',
+        },
 
-		// Conflict in Stadium
-		var sql_query2 = `SELECT Time from Matches where StadiumID = "${StadiumID}";`;
-		var executed2 = await applyQuery(sql_query2);
-		// if (executed2.length == 0) {
-		// 	return res.status(400).json({
-		// 		meta: {
-		// 			status: 500,
-		// 			msg: "INTERNAL_SERVER_ERROR",
-		// 		},
+        'res': {
+          'error': 'No stadium found with given ID',
+          'data': '',
+        },
+      });
+    }
+    for (var i = 0; i < executed2.length; i++) {
+      // handle datetime object from mysql
+      var time1 = new Date(executed2[i].Time);
+      var time2 = new Date(Time);
 
-		// 		res: {
-		// 			error: "No stadium found with given ID",
-		// 			data: "",
-		// 		},
-		// 	});
-		// }
-		for (var i = 0; i < executed2.length; i++) {
-			// handle datetime object from mysql
-			var time1 = new Date(executed2[i].Time);
-			var time2 = new Date(Time);
+      // Conflict match time in same Stadium
+      var diff = Math.abs(time1 - time2) / 1000 / 60;
+      if (diff < 120) {
+        return res.status(400).json({
+          'meta': {
+            'status': 500,
+            'msg': 'INTERNAL_SERVER_ERROR',
+          },
+          'res': {
+            'error': 'Stadium is busy at this time',
+            'data': '',
+          },
+        });
+      }
+    } 
 
-			// Conflict match time in same Stadium
-			var diff = Math.abs(time1 - time2) / 1000 / 60;
-			if (diff < 120) {
-				return res.status(400).json({
-					meta: {
-						status: 500,
-						msg: "INTERNAL_SERVER_ERROR",
-					},
-					res: {
-						error: "Stadium is busy at this time",
-						data: "",
-					},
-				});
-			}
-		}
+    var executed = await applyQuery(sql_query);
 
-		var executed = await applyQuery(sql_query);
+    if (executed) {
+      id = executed.insertId
 
-		if (executed) {
-			id = executed.insertId;
+      var sql_query1 = `SELECT * from Matches where ID = "${id}";`
+      var executed1 = await applyQuery(sql_query1);
 
-			var sql_query1 = `SELECT * from Matches where ID = "${id}";`;
-			var executed1 = await applyQuery(sql_query1);
-			// console.log(executed1);
-
-			return res.status(200).json(executed1);
-		}
-	} catch (e) {
-		console.log(e);
-		return res.status(400).send(e);
-	}
+      return res.status(200).json(executed1);
+    }
+  }
+  catch (e) {
+    console.log(e)
+    return res.status(400).send(e);
+  }
 });
 
 // Updating a match
-router.put("/:id", async (req, res) => {
-	// if (global_type != "Admin" && global_type != "Manager") {
-	// 	return res.status(401).send("Unauthorized");
-	// }
+router.put('/:id', isAuthorized(allEndpoints.AuthMatch),
+async (req, res) => {
 
-	const id = req.params.id;
+  const id = req.params.id;
 
-	// TODO: check for null values
-	// TODO: check for invalid values :O
-	// TODO: conflict on Stadium
-	// TODO: conflict on Teams
+  // TODO: check for null values
+  // TODO: check for invalid values :O
+  // TODO: conflict on Stadium
+  // TODO: conflict on Teams
 
-	var StadiumID = req.body.StadiumID;
-	var Time = req.body.Time;
-	var Team1 = req.body.Team1;
-	var Team2 = req.body.Team2;
-	var Referee = req.body.Referee;
-	var Linesman1 = req.body.Linesman1;
-	var Linesman2 = req.body.Linesman2;
+  var StadiumID = req.body.StadiumID;
+  var Time = req.body.Time;
+  var Team1 = req.body.Team1;
+  var Team2 = req.body.Team2;
+  var Referee = req.body.Referee;
+  var Linesman1 = req.body.Linesman1;
+  var Linesman2 = req.body.Linesman2;
 
-	// update query
-	var sql_query = `UPDATE Matches SET `;
+  // update query
+  var sql_query = `UPDATE Matches SET `;
 
-	if (StadiumID) {
-		sql_query += `StadiumID = "${StadiumID}", `;
-	}
-	if (Time) {
-		sql_query += `Time = "${Time}", `;
-	}
-	if (Team1) {
-		sql_query += `Team1 = "${Team1}", `;
-	}
-	if (Team2) {
-		sql_query += `Team2 = "${Team2}", `;
-	}
-	if (Referee) {
-		sql_query += `Referee = "${Referee}", `;
-	}
-	if (Linesman1) {
-		sql_query += `Linesman1 = "${Linesman1}", `;
-	}
-	if (Linesman2) {
-		sql_query += `Linesman2 = "${Linesman2}", `;
-	}
+  if (StadiumID) {
+    sql_query += `StadiumID = "${StadiumID}", `;
+  }
+  if (Time) {
+    sql_query += `Time = "${Time}", `;
+  }
+  if (Team1) {
+    sql_query += `Team1 = "${Team1}", `;
+  }
+  if (Team2) {
+    sql_query += `Team2 = "${Team2}", `;
+  }
+  if (Referee) {
+    sql_query += `Referee = "${Referee}", `;
+  }
+  if (Linesman1) {
+    sql_query += `Linesman1 = "${Linesman1}", `;
+  }
+  if (Linesman2) {
+    sql_query += `Linesman2 = "${Linesman2}", `;
+  }
 
-	if (sql_query.endsWith(", ")) {
-		sql_query = sql_query.slice(0, -2);
-		sql_query += ` WHERE ID = "${id}";`;
-		//
-		try {
-			var executed = await applyQuery(sql_query);
-			if (executed) {
-				return res.status(200).json({
-					res: "Match Updated Successfully",
-				});
-			}
-		} catch (e) {
-			console.log(e);
-			return res.status(400).send(e);
-		}
-	} else {
-		return res.status(400).json({
-			meta: {
-				status: 500,
-				msg: "INTERNAL_SERVER_ERROR",
-			},
-			res: {
-				error: "No data to update",
-				data: "",
-			},
-		});
-	}
+  if (sql_query.endsWith(', ')) {
+    sql_query = sql_query.slice(0, -2);
+    sql_query += ` WHERE ID = "${id}";`;
+    
+    try {
+      var executed = await applyQuery(sql_query);
+      if (executed) {
+        return res.status(200).json({
+          "res": "Match Updated Successfully"
+        });
+      }
+    }
+    catch (e) {
+      console.log(e)
+      return res.status(400).send(e);
+    }
+  }
+  else {
+    return res.status(400).json({
+      'meta': {
+        'status': 500,
+        'msg': 'INTERNAL_SERVER_ERROR',
+      },
+      'res': {
+        'error': 'No data to update',
+        'data': '',
+      },
+    });
+  }
 });
 
 // Delete a match
-router.delete("/:id", async (req, res) => {
-	// if (global_type != "Admin" && global_type != "Manager") {
-	// 	return res.status(401).send("Unauthorized");
-	// }
+router.delete('/:id',isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
 
-	const id = req.params.id;
+  const id = req.params.id;
 
-	var sql_query = `DELETE FROM Matches where ID = "${id}";`;
-	try {
-		await applyQuery(sql_query);
-	} catch (e) {
-		console.log(e);
-		return res.status(400).send("No match found with this ID");
-	}
+  var sql_query = `DELETE FROM Matches where ID = "${id}";`
+  try {
+    await applyQuery(sql_query);
+  }
+  catch (e) {
+    console.log(e);
+    return res.status(400).send("No match found with this ID");
+  }
 });
 
 // Seats status
-router.get("/:id/seats", async (req, res) => {
-	// if (global_type != "Admin" && global_type != "Manager") {
-	//  return res.status(401).send("Unauthorized");
-	//
+router.get("/:id/seats",isAuthorized(allEndpoints.AuthMatch), async (req, res) => {
 
-	// if (global_type != "Admin" && global_type != "Manager") {
-	// 	return res.status(401).send("Unauthorized");
-	// }
 	const id = req.params.id;
 
 	// get max seats
@@ -341,25 +321,10 @@ router.get("/:id/seats", async (req, res) => {
 
 // Reserve vacant seats
 // parameters -> seat number
-router.post("/:id/seats", async (req, res) => {
-	// if (
-	// 	global_type != "Admin" &&
-	// 	global_type != "Manager" &&
-	// 	global_type != "Fan"
-	// ) {
-	// 	return res.status(401).json({
-	// 		meta: {
-	// 			status: 401,
-	// 			msg: "UNAUTHORIZED",
-	// 		},
-	// 		res: {
-	// 			error: "Log in to use this feature",
-	// 			data: "",
-	// 		},
-	// 	});
-	// }
+router.post("/:Username/:id/seats", isAuthorized(allEndpoints.reserve), async (req, res) => {
 
 	const mid = req.params.id;
+  const username = req.params.Username;
 	const seats = req.body.seats;
 	// console.log(seats)
 	if (seats.length == 0) {
@@ -375,8 +340,7 @@ router.post("/:id/seats", async (req, res) => {
 		});
 	}
 
-	console.log("nameeeeeeee: " + global_username);
-	var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
+	var sql_query = `SELECT ID FROM Users WHERE Username = "${username}";`;
 	var executed = await applyQuery(sql_query);
 	const uid = executed[0].ID;
 	// const uid = 1;
@@ -459,27 +423,11 @@ router.post("/:id/seats", async (req, res) => {
 
 // Cancel reservation
 // Same Format as reserve
-router.delete("/:id/seats/", async (req, res) => {
-	// if (
-	// 	global_type != "Admin" &&
-	// 	global_type != "Manager" &&
-	// 	global_type != "Fan"
-	// ) {
-	// 	return res.status(401).json({
-	// 		meta: {
-	// 			status: 401,
-	// 			msg: "UNAUTHORIZED",
-	// 		},
-	// 		res: {
-	// 			error: "Log in to use this feature",
-	// 			data: "",
-	// 		},
-	// 	});
-	// }
+router.delete("/:Username/:id/seats/", isAuthorized(allEndpoints.reserve), async (req, res) => {
 
 	const mid = req.params.id;
+  const username = req.params.Username;
 	const seats = req.body.seats;
-	// console.log(seats)
 	if (seats.length == 0) {
 		return res.status(400).json({
 			meta: {
@@ -493,8 +441,7 @@ router.delete("/:id/seats/", async (req, res) => {
 		});
 	}
 
-	console.log("nameeeeeeee: " + global_username);
-	var sql_query = `SELECT ID FROM Users WHERE Username = "${global_username}";`;
+	var sql_query = `SELECT ID FROM Users WHERE Username = "${username}";`;
 	var executed = await applyQuery(sql_query);
 	const uid = executed[0].ID;
 	// const uid = 1;

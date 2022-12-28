@@ -1,13 +1,15 @@
 const router = require('express').Router();
-
+const isAuthorized = require('../Configurations//isAuthorized');
+const allEndpoints=require('./endpoints');
 var db = require('../db');
 
 
-router.put('/', async (req, res) => {
+router.put('/:Username', isAuthorized(allEndpoints.userProfile),async (req, res) => {
 
     var firstname= req.body.FirstName ;
     var lastname= req.body.LastName ;
-    var username= req.body.Username;
+    var oldUsername= req.params.Username;
+    var newUsername= req.body.Username;
     var email=req.body.Email;
     var pass=req.body.Password;
     var birthdate=req.body.Birthdate;
@@ -15,12 +17,8 @@ router.put('/', async (req, res) => {
     var nationality = req.body.Nationality;
     var role = req.body.Role;
 
-    // check for signing in
-    if(!global_username){
-      return res.status(401).json("you must sign in");
-    }
     // get the user, then update it once
-    query= "SELECT * FROM Users where Username ='"+global_username+"'";
+    query= "SELECT * FROM Users where Username ='"+oldUsername+"'";
     sql =await applyQuery(query);
 
     // if user doesn't exist
@@ -34,7 +32,7 @@ router.put('/', async (req, res) => {
     {
       role = sql[0]['Role']
     }
-    else if (role === '0') {
+    else if (role === '0' && sql[0]['Role'] !== '0') {
       return res.status(401).json('You are not allowed to be an IT Administrator');
     }
     else if (role === '1') { // fan wants to be manager
@@ -42,73 +40,82 @@ router.put('/', async (req, res) => {
     }
 
     // handle nullity of user input for not changing those inputs
-    if(!firstname)
+ 
+    if(email)
     {
-      firstname = sql[0]['FirstName']
-    }
-    if(!lastname)
-    {
-      lastname = sql[0]['LastName']
-    }
-    if(!email)
-    {
-      email = sql[0]['Email']
-    }
-    else{// update email and it should be valid
-      console.log(global_username)
-      let email_sql = `select * from Users where Email = "${email}" and Username != ${global_username}`;
+      let email_sql = `select * from Users where Email = "${email}" and Username != ${oldUsername}`;
       let executed = await applyQuery(email_sql);
-      if(executed)
+      console.log(executed)
+      if(executed.length != 0)
       {
         return res.json("This email is already in use")
       }
     }
-    if(!pass)
-    {
-      pass = sql[0]['Password']
-    }
-    if(!birthdate)
-    {
-      birthdate = sql[0]['BirthDate']
-    }
-    if(!gender)
-    {
-      gender = sql[0]['Gender']
-    }
-    if(!nationality)
-    {
-      nationality = sql[0]['Nationality']
-    }
     
-    // update password and hash it
+    // // update password and hash it
 
-    // update username at the end , then update the token (global_username)
-    if(!username)
+    // update username at the end , then update the token 
+    if(newUsername)
     {
-      username = sql[0]['Username']
-    }
-    else{// update username and it should be valid
-      let username_sql = `select * from Users where Username = "${username}"`;
+      let username_sql = `select * from Users where Username = "${oldUsername}"`;
       let executed = await applyQuery(username_sql);
-      if(executed.length != [])
+      if(executed.length != 0)
       {
         return res.json("This username is already in use")
       }
     }
-    query= `UPDATE Users set FirstName =" ${firstname} ",LastName = "${lastname}", Email ="${email}", Password ="${pass}" , Birthdate="${birthdate}"
-    ,Gender ="${gender}", Nationality="${nationality}", Username ="  ${username}"   where Username =" ${global_username}"`;
-    let excute = await applyQuery(query);
-    global_username=username;
 
-    let print_query = `select * from Users where Username =" ${global_username}"`
-    let excute_print_query = await applyQuery(print_query);
-    console.log(excute_print_query)
-    
-    
+    // query= `UPDATE Users set FirstName ="${firstname}",LastName = "${lastname}", Email ="${email}", Password ="${pass}" , BirthDate=${birthdate},Gender =${gender}, Nationality="${nationality}", UserName ="${newUsername}" ,Role = ${role}  where UserName ="${oldUsername}";`;
+    // update query
+  var sql_query = `UPDATE Users SET `;
 
-    return res.status(200).json('User updated');
+  if (firstname) {
+    sql_query += `FirstName = "${firstname}", `;
+  }
+  if (lastname) {
+    sql_query += `LastName = "${lastname}", `;
+  }
+  if (email) {
+    sql_query += `Email = "${email}", `;
+  }
+  if (pass) {
+    sql_query += `Password = "${pass}", `;
+  }
+  if (birthdate) {
+    sql_query += `BirthDate = "${birthdate}", `;
+  }
+  if (gender) {
+    sql_query += `Gender = "${gender}", `;
+  }
+  if (nationality) {
+    sql_query += `Nationality = "${nationality}", `;
+  }
+  if (newUsername) {
+    sql_query += `UserName = "${newUsername}", `;
+  }
+  if (role) {
+    sql_query += `Role = "${role}", `;
+  }
 
-});
+  if (sql_query.endsWith(', ')) {
+    sql_query = sql_query.slice(0, -2);
+    sql_query += ` WHERE UserName ="${oldUsername}";`;
+  }
+    let excute_update = await applyQuery(sql_query);
+    if(newUsername)
+    {
+      oldUsername = newUsername
+    }
+
+    if(excute_update) 
+    {
+      let print_query = `select * from Users where UserName ="${oldUsername}";`;
+      let excute_print_query = await applyQuery(print_query);
+      
+      return res.status(200).json('User updated');  
+    }
+  });
+   
 
 const applyQuery = (query) => {
   return new Promise((resolve, reject) => {
