@@ -8,10 +8,10 @@ const session = require('express-session');
 const flush = require('connect-flash');
 const app = express();
 
-const port = process.env.PORT || 8080;
-
 // Set up Global configuration access
 dotenv.config();
+
+const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,7 +55,7 @@ app.use('/users', require('./BackEnd/routes/users'));
 app.use('/team', require('./BackEnd/routes/team'));
 app.use('/editUser', require('./BackEnd/routes/editUser'));
 app.use('/deleteUser', require('./BackEnd/routes/deleteUser'));
-app.use('/stadium', require('./BackEnd/routes/stadium'));
+app.use('/stadiums', require('./BackEnd/routes/stadiums'));
 
 
 app.listen(port,(error)=>{ 
