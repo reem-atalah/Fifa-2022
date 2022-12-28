@@ -1,5 +1,5 @@
 .match-card {
-    @apply  bg-white h-fit flex flex-col lg:max-w-md;
+    @apply shrink-0 basis-full sm:basis-96 bg-white h-fit flex flex-col lg:max-w-md;
 }
 .edit-icon {
     @apply w-fit ml-auto block p-2;

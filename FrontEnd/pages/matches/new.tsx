@@ -1,14 +1,14 @@
 import React from "react";
 import Head from "next/head";
 import Header from "../../components/Header/Header";
-import NewMatchForm from "../../components/NewMatchForm/NewMatchForm";
+import MatchForm from "../../components/MatchForm/MatchForm";
 import type { GetServerSidePropsContext } from "next";
 import { Role } from "../../types";
 import { getSession } from "next-auth/react";
 import { getAllTeams } from "../../data/matches/TeamsApi";
 import { getAllStadiums } from "../../data/stadiums/StadiumMockApi";
 
-const createNewMatch = ({ teams, stadiums }: any) => {
+const NewMatch = ({ teams, stadiums }: any) => {
 	return (
 		<>
 			<Head>
@@ -18,13 +18,15 @@ const createNewMatch = ({ teams, stadiums }: any) => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<Header />
-			<h1 className="text-2xl font-bold text-center my-2 py-2">Create New Match</h1>
-			<NewMatchForm teams={teams} stadiums={stadiums} />
+			<h1 className="text-2xl font-bold text-center my-2 py-2">
+				Create New Match
+			</h1>
+			<MatchForm teams={teams} stadiums={stadiums} createNew={true} />
 		</>
 	);
 };
 
-export default createNewMatch;
+export default NewMatch;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
 	// Fetch data from external API
@@ -47,5 +49,5 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 	const teams = await getAllTeams();
 	const stadiums = await getAllStadiums();
 
-	return { props: { teams: teams, ...stadiums } };
+	return { props: { ...teams, ...stadiums } };
 }

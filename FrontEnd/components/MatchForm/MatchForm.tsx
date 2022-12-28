@@ -1,38 +1,64 @@
 import React, { useState } from "react";
-import styles from "./NewMatchForm.module.css";
+import styles from "./MatchForm.module.css";
 import { Formik, Form } from "formik";
 import TextInput from "../InputFields/TextInput/TextInput";
 import SelectInput from "../InputFields/SelectInput/SelectInput";
 import validateMatchForm from "../../utils/validateMatchForm";
-import { createMatch } from "../../data/matches/MatchesMockApi";
+import { createMatch, updateMatch } from "../../data/matches/MatchesMockApi";
 import { useRouter } from "next/router";
 import moment from "moment";
-const NewMatchForm = ({ teams, stadiums }: any) => {
+
+type Props = {
+	teams: any;
+	stadiums: any;
+	createNew: Boolean;
+	initialValues?: any;
+};
+
+const MatchForm = ({ teams, stadiums, createNew, initialValues }: Props) => {
 	const [error, setError] = useState("");
 	const router = useRouter();
 
-	const handleSubmit = async (values: any) => {
+	const handleSubmit = async (values: any, props: any) => {
 		const { Date: date, Time: time, ...params } = values;
+		console.log(params);
+		params.Time = new Date(`${date} ${time}:00`).toLocaleString("sv-SE");
 
-		params.Time = moment(`${date} ${time}:00`)
-			.format("YYYY-MM-DD hh:mm:ss")
-			.toString();
-			
-		createMatch(params)
-			.then((res) => {
-				console.log(res);
-				router.push("/matches");
-			})
-			.catch((err) => {
-				console.log(err);
-				setError("Something went wrong");
-			});
+		if (createNew) {
+			createMatch(params)
+				.then((res) => {
+					router.push("/matches");
+				})
+				.catch((err) => {
+					console.log(err);
+					setError("Something went wrong");
+				});
+		} else {
+			// const { initialValues } = props;
+			// let valuesToSend: any = {};
+			// values.forEach(({ key, value }: any) => {
+			// 	if (initialValues[key] !== value) {
+			// 		valuesToSend[key] = value;
+			// 	}
+			// });
+			// if (valuesToSend) {
+			console.log(values);
+			updateMatch(params)
+				.then((res) => {
+					router.push("/matches");
+				})
+				.catch((err) => {
+					console.log(err);
+					setError("Something went wrong");
+				});
+			// }
+		}
 	};
 	return (
 		<Formik
 			enableReinitialize
 			initialValues={{
-				StadiumID: 0,
+				StadiumID: "",
 				Date: "",
 				Time: "",
 				Team1: "",
@@ -40,6 +66,7 @@ const NewMatchForm = ({ teams, stadiums }: any) => {
 				Referee: "",
 				Linesman1: "",
 				Linesman2: "",
+				...(initialValues || {}),
 			}}
 			onSubmit={handleSubmit}
 			validate={(values) =>
@@ -101,4 +128,4 @@ const NewMatchForm = ({ teams, stadiums }: any) => {
 	);
 };
 
-export default NewMatchForm;
+export default MatchForm;

@@ -4,12 +4,18 @@ import { GiWhistle } from "react-icons/gi";
 import { TbRectangleVertical } from "react-icons/tb";
 import { MdPlace, MdEdit } from "react-icons/md";
 import Link from "next/link";
-const MatchCard = ({ match }: any) => {
+import { useRouter } from "next/router";
+const MatchCard = ({ match, showControl }: any) => {
 	return (
 		<div className={styles["match-card"]}>
-			<Link href="/matches/edit" className={styles["edit-icon"]}>
-				<MdEdit />
-			</Link>
+			{showControl && (
+				<Link
+					href={{ pathname: `matches/${match.ID}/edit`, query: { ...match } }}
+					className={styles["edit-icon"]}
+				>
+					<MdEdit />
+				</Link>
+			)}
 			<div className={styles["match-card__header"]}>
 				<div className={styles["teams-wrapper"]}>
 					<div className={styles["match-card__team"]}>

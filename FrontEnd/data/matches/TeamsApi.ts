@@ -5,7 +5,7 @@ export async function getAllTeams() {
 		.get("http://localhost:8080/team")
 		.then((res) => {
 			// console.log(res.data);
-			return res.data;
+			return { teams: res.data };
 		})
 		.catch((err) => {
 			console.log(err);

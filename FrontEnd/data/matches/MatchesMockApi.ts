@@ -1,8 +1,5 @@
 import axios from "axios";
 import Match from "../../features/match/domain/Match";
-type Props = {
-	Username: string;
-};
 
 export async function getAllMatches() {
 	return axios
@@ -16,7 +13,7 @@ export async function getAllMatches() {
 		});
 }
 
-export async function createMatch(params: Props) {
+export async function createMatch(params: any) {
 	return axios
 		.post("http://localhost:8080/matches", { ...params })
 		.then((res) => {
@@ -24,22 +21,12 @@ export async function createMatch(params: Props) {
 			return res.data;
 		});
 }
-export default class MatchesMockApi {
-	public getAllMatches() {
-		return axios
-			.get("http://localhost:8080/matches")
-			.then((res) => {
-				console.log(res);
-			})
-			.catch((err) => {
-				console.log(err);
-			});
-		return [];
-	}
-	public getMatch(id: string): Match | null {
-		return null;
-	}
-	public addMatch(match: Match): void {}
-	public removeMatch(id: string): void {}
-	// remaining functionalities
+
+export async function updateMatch(params: any) {
+	return axios
+		.put(`http://localhost:8080/matches/${params.ID}`, { ...params })
+		.then((res) => {
+			console.log(res);
+			return true;
+		});
 }
