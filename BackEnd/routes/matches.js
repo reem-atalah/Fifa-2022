@@ -178,8 +178,9 @@ async (req, res) => {
   if (Time) {
     if (new Date(Time) == "Invalid Date") return res.status(400).json({msg: 'Can"t Decode Time value as DateTime Object'});
     sql_query += `Time = "${Time}", `;
+    Time = new Date(Time);
   }
-  else Time = ex[0].Time;
+  else Time = new Date(ex[0].Time);
 
   if (Team1) {
     let sq = `SELECT * FROM Teams WHERE ID = ${Team1};`;
@@ -233,13 +234,29 @@ async (req, res) => {
       return res.status(500).json({ msg: 'Stadium has conflicting matches' });
     }
 
-    // TODO:
     // CONFLICT If any user that has tickets for this match is going to be in another match at the same time
     {
       // Get all users who has tickets for this match
-      let sq = `SELECT UserID FROM Reserve WHERE MatchID = ${id};`;
+      let sq = `SELECT DISTINCT UserID FROM Reserve WHERE MatchID = ${id};`;
       let ex = await applyQuery(sq);
-      console.log(ex);
+      // For all users, see if they have any other match that is conflicting with the new Time
+      for (let i = 0; i < ex.length; ++i)
+      {
+        uid = ex[i].UserID;
+        // for all matches where user has already registered excpet current match
+        sql_query = `SELECT M.Time FROM Reserve AS R JOIN Matches AS M ON R.MatchId = M.ID
+                     WHERE R.UserID = "${uid}" AND R.MatchID != "${id}";`;
+        executed = await applyQuery(sql_query);
+        // console.log('current');
+        // console.log(Time);
+        // console.log(executed);
+        //
+        if (await CheckConflictingTimes(executed, Time, 120)) {
+          return res.status(500).json({
+            msg: 'Some customer who already reserved seats for this \
+match, have conflicting matches with the new time'});
+        }
+      }
     }
 
     //
@@ -403,7 +420,7 @@ router.delete("/:id/seats/", isAuthorized(allEndpoints.reserve), async (req, res
 	const mid = req.params.id;
   const username = await getUsernameFromToken(req);
 	const seats = req.body.seats;
-	if (!seats or seats.length == 0) {
+	if (!seats || seats.length == 0) {
 		return res.status(400).json({msg: "Empty request"});
   }
 
@@ -477,6 +494,9 @@ const CheckConflictingTimes = async (ex, t2, minutes) => {
       let t1 = new Date(ex[i].Time);
       // Differnece in minutes
       let diff = Math.abs(t1 - t2) / 1000 / 60;
+      // console.log(t1);
+      // console.log(t2);
+      // console.log(diff);
       if (diff < minutes) {
         return true;
       }
