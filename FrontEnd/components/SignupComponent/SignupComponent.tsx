@@ -10,6 +10,30 @@ import styles from "./SignupComponent.module.css";
 const SignupComponent = () => {
 	const router = useRouter();
 	const [error, setError] = useState("");
+	
+	const handleSubmit = (values: any) => {
+		axios
+			.post("http://localhost:8080/register", {
+				FirstName: values.firstName,
+				LastName: values.lastName,
+				Email: values.email,
+				Password: values.password,
+				Username: values.username,
+				Birthdate: values.birthDate,
+				Gender: values.gender,
+				Nationality: values.nationality,
+				Role: Role.fan,
+			})
+			.then((res) => {
+				console.log(res);
+				setError("");
+				router.push("/signin");
+			})
+			.catch((err) => {
+				console.log(err);
+				setError(err.response.data);
+			});
+	};
 
 	return (
 		<Formik
@@ -26,29 +50,7 @@ const SignupComponent = () => {
 				nationality: "",
 			}}
 			validate={validateSignup}
-			onSubmit={(values) => {
-				axios
-					.post("http://localhost:8080/register", {
-						FirstName: values.firstName,
-						LastName: values.lastName,
-						Email: values.email,
-						Password: values.password,
-						Username: values.username,
-						Birthdate: values.birthDate,
-						Gender: values.gender,
-						Nationality: values.nationality,
-						Role: Role.fan,
-					})
-					.then((res) => {
-						console.log(res);
-						setError("");
-						router.push("/signin");
-					})
-					.catch((err) => {
-						console.log(err);
-						setError(err.response.data);
-					});
-			}}
+			onSubmit={handleSubmit}
 		>
 			<Form className="form">
 				<TextInput

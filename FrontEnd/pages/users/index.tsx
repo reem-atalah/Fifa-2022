@@ -1,10 +1,10 @@
 import React from "react";
 import Head from "next/head";
-import Header from "../../components/header";
+import Header from "../../components/Header/Header";
 import UserCard from "../../components/UserCard/UserCard";
 import { getSession } from "next-auth/react";
 import { Role } from "../../types";
-
+import { getAllUsers } from "../../data/users/UserMockApi";
 const index = ({ Users, currentUserRole }: any) => {
 	return (
 		<>
@@ -51,8 +51,7 @@ export async function getServerSideProps(context: any) {
 		};
 	}
 
-	const response = await fetch(`http://localhost:8080/users`);
-	const usersData = await response.json();
+	const usersData = await getAllUsers();
 	return {
 		props: { ...usersData, currentUserRole: session?.user?.Role }, // will be passed to the page component as props
 	};

@@ -1,0 +1,6 @@
+.matches_form {
+    @apply bg-slate-100 p-2 rounded max-w-3xl m-auto flex flex-wrap justify-between;
+}
+.matches_form__small-field {
+    @apply basis-1/2 grow;
+}

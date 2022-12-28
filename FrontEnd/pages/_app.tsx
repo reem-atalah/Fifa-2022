@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "../styles/forms.css";
+import "../styles/index.css";
 import type { AppProps } from "next/app";
 import "../types";
 import { SessionProvider } from "next-auth/react";

@@ -36,44 +36,40 @@ router.get('/:Username/:id', async (req, res) => {
   left join teams as t1 on m.Team1 = t1.ID
   left join teams as t2 on m.Team2 = t2.ID
   where m.ID = ${ID} ;`;
-  
 
-  try {
-    var executed1 = await applyQuery(sql_query1); 
-    // No Matches Found
-    if (executed1.length == 0) {
-      return res.status(400).json("No match found with given ID");
-    }
-    let matchObject = executed1[0];
+	try {
+		var executed1 = await applyQuery(sql_query1);
+		// No Matches Found
+		if (executed1.length == 0) {
+			return res.status(400).json("No match found with given ID");
+		}
+		let matchObject = executed1[0];
 
-    let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
+		let sql_query_user_sets = `SELECT  SeatNo FROM Reserve 
     join Users on UserID = ID
     where MatchID = ${ID} and Username = "${username}";`;
 
-    let sql_query_not_user_seats = `SELECT  SeatNo FROM Reserve 
+		let sql_query_not_user_seats = `SELECT  SeatNo FROM Reserve 
     join Users on UserID = ID
     where MatchID = ${ID} and Username != "${username}" ;`;
 
-    let executed2 = await applyQuery(sql_query_user_sets);
-    let executed3 = await applyQuery(sql_query_not_user_seats);
+		let executed2 = await applyQuery(sql_query_user_sets);
+		let executed3 = await applyQuery(sql_query_not_user_seats);
 
+		userSeatsList = [];
+		nonUserSeatList = [];
+		for (seat in executed2) userSeatsList.push(executed2[seat]["SeatNo"]);
+		for (seat in executed3) nonUserSeatList.push(executed3[seat]["SeatNo"]);
 
-
-    userSeatsList = [] 
-    nonUserSeatList = []
-    for(seat in executed2) userSeatsList.push(executed2[seat]['SeatNo'])
-    for(seat in executed3) nonUserSeatList.push(executed3[seat]['SeatNo'])
-
-    matchObject['UserList'] = userSeatsList;
-    matchObject['OtherList'] = nonUserSeatList;
-    return res.status(200).json({
-      ...matchObject
-    });
-  }
-  catch (e) {
-    console.log(e);
-    return res.status(404).send(e);
-  }
+		matchObject["UserList"] = userSeatsList;
+		matchObject["OtherList"] = nonUserSeatList;
+		return res.status(200).json({
+			...matchObject,
+		});
+	} catch (e) {
+		console.log(e);
+		return res.status(404).send(e);
+	}
 });
 
 // Creating a match

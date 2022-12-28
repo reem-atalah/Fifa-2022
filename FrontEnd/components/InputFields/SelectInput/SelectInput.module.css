@@ -1,0 +1,13 @@
+.selectinput_wrapper {
+	@apply flex flex-col basis-full;
+}
+.selectinput_wrapper__label {
+	@apply font-semibold text-slate-600;
+}
+
+.selectinput_wrapper__input {
+	@apply p-2 bg-white rounded-md;
+}
+.selectinput_wrapper__error {
+	@apply text-red-500 h-6;
+}

@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Header from "../components/header";
+import Header from "../components/Header/Header";
 import Image from "next/image";
 import Link from "next/link";
 import { getSession } from "next-auth/react";
