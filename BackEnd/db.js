@@ -1,11 +1,14 @@
+const dotenv = require('dotenv');
 const util = require("util");
+
+dotenv.config();
 var mysql = require("mysql");
 
 const pool = mysql.createPool({
 	host: "127.0.0.1",
-	port: "3306",
-	user: "root",
-	password: "root123",
+	port: process.env.sqlport || "3306",
+	user: process.env.sqluser,
+	password: process.env.sqlpassword,
 	database: "FIFA_2022",
 });
 
