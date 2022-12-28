@@ -42,10 +42,10 @@ router.get('/:id', async (req, res) => {
   var sql_query1 = `
   SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, s.NumRows as Number_Rows, s.NumSeatsPerRow as NumSeatsPerRow, 
   t1.Name as Team1Name, t2.Name as Team2Name, t1.picture as Team1Picture, t2.picture as Team2Picture
-  FROM matches as m 
-  left join stadiums as s on m.StadiumID = s.ID
-  left join teams as t1 on m.Team1 = t1.ID
-  left join teams as t2 on m.Team2 = t2.ID
+  FROM Matches as m 
+  left join Stadiums as s on m.StadiumID = s.ID
+  left join Teams as t1 on m.Team1 = t1.ID
+  left join Teams as t2 on m.Team2 = t2.ID
   where m.ID = ${ID};`;
 
 	try {

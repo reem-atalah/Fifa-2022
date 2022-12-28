@@ -1,0 +1,3 @@
+.match-card {
+    @apply shrink-0 grow basis-full sm:basis-[310px] md:max-w-[310px]
+}

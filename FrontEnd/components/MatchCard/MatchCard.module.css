@@ -1,5 +1,12 @@
 .match-card {
-    @apply shrink-0 basis-full sm:basis-96 bg-white h-fit flex flex-col lg:max-w-md;
+    @apply bg-white h-fit flex flex-col;
+}
+.match-card__team {
+    @apply flex flex-col items-center justify-center space-y-2;
+}
+.match-card__team div {
+    @apply w-20 h-14 bg-red-800 rounded-lg border-8 box-content border-slate-300;
+
 }
 .edit-icon {
     @apply w-fit ml-auto block p-2;
@@ -8,7 +15,7 @@
     @apply p-5 flex flex-col items-center border-b-4;
 }
 .teams-wrapper {
-	@apply flex flex-wrap justify-between w-full text-xl;
+	@apply flex flex-wrap justify-between items-center w-full text-xl;
 }
 .date-time {
     @apply text-sm text-center text-slate-500;

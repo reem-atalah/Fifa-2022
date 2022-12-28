@@ -9,15 +9,15 @@ const AdminControlsComponent = ({
 }: any) => {
 	let message = "";
 	let possibleRequestedRole = role;
-	if (role === Role.manager) {
+	if (role === Role.Manager) {
 		message = "Make Fan";
-		possibleRequestedRole = Role.fan;
-	} else if (role === Role.pendingManager) {
+		possibleRequestedRole = Role.Fan;
+	} else if (role === Role.PendingManager) {
 		message = "Accept Request";
-		possibleRequestedRole = Role.manager;
-	} else if (role === Role.fan) {
+		possibleRequestedRole = Role.Manager;
+	} else if (role === Role.Fan) {
 		message = "Make Manager";
-		possibleRequestedRole = Role.manager;
+		possibleRequestedRole = Role.Manager;
 	}
 	return (
 		<div className={styles["control_components"]}>

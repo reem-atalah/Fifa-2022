@@ -33,3 +33,15 @@ export async function updateMatch(params: any, headers: any) {
 			return true;
 		});
 }
+export async function getMatch({ ID }: any, headers: any) {
+	return axios
+		.get(`http://localhost:8080/matches/${ID}`, { headers })
+		.then((res) => {
+			console.log(res);
+			return { match: res.data };
+		})
+		.catch((err) => {
+			console.error(err);
+			return null;
+		});
+}

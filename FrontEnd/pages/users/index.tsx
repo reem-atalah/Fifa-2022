@@ -6,6 +6,7 @@ import { getSession } from "next-auth/react";
 import { Role } from "../../types";
 import { getAllUsers } from "../../data/users/UserMockApi";
 const index = ({ Users, currentUserRole }: any) => {
+	console.log(currentUserRole);
 	return (
 		<>
 			<Head>
@@ -22,7 +23,7 @@ const index = ({ Users, currentUserRole }: any) => {
 					<UserCard
 						key={`user-${user.ID}`}
 						user={user}
-						showControls={currentUserRole === "0"}
+						showControls={currentUserRole === Role.Admin}
 					/>
 				))}
 			</div>
@@ -35,14 +36,14 @@ export default index;
 export async function getServerSideProps(context: any) {
 	// Fetch data from external API
 	const session = await getSession(context);
-	if (!session) {
+	if (!session || !session.user || !session.user.token) {
 		return {
 			redirect: {
 				permanent: false,
 				destination: "/signin",
 			},
 		};
-	} else if (session?.user?.Role !== Role.admin) {
+	} else if (session?.user?.role !== Role.Admin) {
 		return {
 			redirect: {
 				permanent: false,
@@ -51,8 +52,11 @@ export async function getServerSideProps(context: any) {
 		};
 	}
 
-	const usersData = await getAllUsers();
+	const usersData = await getAllUsers({
+		Authorization: `Bearer ${session.user.token}`,
+	});
+	console.log(usersData);
 	return {
-		props: { ...usersData, currentUserRole: session?.user?.Role }, // will be passed to the page component as props
+		props: { ...usersData, currentUserRole: session?.user?.role }, // will be passed to the page component as props
 	};
 }

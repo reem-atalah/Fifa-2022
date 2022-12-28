@@ -6,6 +6,8 @@ import MatchCard from "../../components/MatchCard/MatchCard";
 import { getSession } from "next-auth/react";
 import { Role } from "../../types";
 import Link from "next/link";
+import styles from "./index.module.css";
+
 type Props = {
 	matches: Array<any>;
 	showControl: Boolean;
@@ -29,7 +31,13 @@ export default function Matches({ matches, showControl }: Props) {
 			)}
 			<div className="bg-red-400 px-1 w-screen flex flex-wrap gap-2">
 				{matches.map((match) => (
-					<MatchCard key={match.ID} match={match} showControl={showControl} />
+					<MatchCard
+						key={match.ID}
+						match={match}
+						showControl={showControl}
+						className={styles["match-card"]}
+						asLink={true}
+					/>
 				))}
 			</div>
 		</>

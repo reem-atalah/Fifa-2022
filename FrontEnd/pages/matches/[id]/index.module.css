@@ -1,0 +1,9 @@
+.teams-wrapper {
+    @apply flex justify-between items-center p-5;
+}
+.teams-wrapper__item {
+    @apply flex flex-col items-center justify-center space-y-2;
+}
+.teams-wrapper__item div {
+    @apply rounded-lg border-8 box-content border-slate-300;
+}

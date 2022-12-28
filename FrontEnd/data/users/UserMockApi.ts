@@ -4,9 +4,9 @@ type Props = {
 	Username: string;
 };
 
-export async function getAllUsers() {
+export async function getAllUsers(headers: any) {
 	return axios
-		.get("http://localhost:8080/users")
+		.get("http://localhost:8080/users", { headers })
 		.then((res) => {
 			console.log(res.data);
 			return res.data;
@@ -16,10 +16,11 @@ export async function getAllUsers() {
 			return { Users: [] };
 		});
 }
-export async function deleteUser({ Username }: Props) {
+export async function deleteUser({ Username }: Props, headers:any) {
 	return axios
 		.delete(`http://localhost:8080/users/${Username}`, {
 			data: { Username },
+			headers
 		})
 		.then((res) => {
 			console.log(res);
@@ -31,11 +32,14 @@ export async function deleteUser({ Username }: Props) {
 		});
 }
 
-export async function changeUserRole({ Username, requestedRole }: any) {
+export async function changeUserRole(
+	{ Username, requestedRole }: any,
+	headers: any
+) {
 	return axios
 		.put(`http://localhost:8080/users/${Username}`, {
 			role: requestedRole,
-		})
+		}, {headers})
 		.then((res) => {
 			console.log(res);
 			return res.status == 200;

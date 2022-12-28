@@ -4,10 +4,24 @@ import { GiWhistle } from "react-icons/gi";
 import { TbRectangleVertical } from "react-icons/tb";
 import { MdPlace, MdEdit } from "react-icons/md";
 import Link from "next/link";
-import { useRouter } from "next/router";
-const MatchCard = ({ match, showControl }: any) => {
+
+const CardWrapper = ({ asLink, href, children, className }: any) => {
+	return asLink ? (
+		<Link href={href} className={className}>
+			{children}
+		</Link>
+	) : (
+		<div className={className}>{children}</div>
+	);
+};
+
+const MatchCard = ({ match, asLink, showControl, className }: any) => {
 	return (
-		<div className={styles["match-card"]}>
+		<CardWrapper
+			asLink={asLink}
+			className={`${className} ${styles["match-card"]}`}
+			href={`matches/${match.ID}`}
+		>
 			{showControl && (
 				<Link
 					href={{ pathname: `matches/${match.ID}/edit`, query: { ...match } }}
@@ -22,6 +36,7 @@ const MatchCard = ({ match, showControl }: any) => {
 						<div className={styles["match-card__team-flag"]}></div>
 						<p className={styles["match-card__team-name"]}>{match.Team1Name}</p>
 					</div>
+					vs
 					<div className={styles["match-card__team"]}>
 						<div className={styles["match-card__team-flag"]}></div>
 						<p className={styles["match-card__team-name"]}>{match.Team2Name}</p>
@@ -63,7 +78,7 @@ const MatchCard = ({ match, showControl }: any) => {
 					<p className={styles["content-item__content"]}>{match.Linesman2}</p>
 				</div>
 			</div>
-		</div>
+		</CardWrapper>
 	);
 };
 
