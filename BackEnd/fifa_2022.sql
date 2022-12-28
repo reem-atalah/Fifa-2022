@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS Reserve
     UserID int not null,
     foreign key (UserID) references Users(ID),
     MatchID int not null,
-    foreign key (MatchID) references Matches(ID),
+    foreign key (MatchID) references Matches(ID) ON DELETE CASCADE,
     SeatNo int not null,
     -- Seats cant be booked twice in the same match
     primary key (MatchID, SeatNo)
