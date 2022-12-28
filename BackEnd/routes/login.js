@@ -65,20 +65,31 @@ router.post('/', async (req, res) => {
 
     // token
     const token = jwt.sign({
-      email: user["Email"],
+      username: user["Username"],
       role: type
     },
       process.env.KEY);
 
-    return res.status(200).json(token);
+    console.log(jwt.verify(token, process.env.KEY));
+
+    // combine token and username in a json object
+    const result = {
+      id: user["ID"],
+      name: user["Username"],
+      email: user["Email"],
+      role: type,
+      token: token
+    }
+
+    return res.status(200).json(result);
   }
   catch (e) {
     console.log(e);
     return res.status(401).send(e);
   }
 }
-
 );
+
 const applyQuery = (query) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
