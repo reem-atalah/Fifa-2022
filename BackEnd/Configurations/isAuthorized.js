@@ -17,6 +17,7 @@ const isAuthorized = (endPoint) => {
         if (token) {
           // the token must be same as signed with it
           const decoded = jwt.verify(token, process.env.KEY);
+          console.log(decoded.role.toString());
           // does this token has access to this endpoint
           const isAllowed=await userRbac.can(decoded.role.toString(), endPoint);
           if (isAllowed) {

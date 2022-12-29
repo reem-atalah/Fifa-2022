@@ -1,10 +1,8 @@
-
 const allEndpoints=require('../..//routes//endpoints.js');
 
 const managerPolicies = [
-    allEndpoints.userProfile,
-    allEndpoints.AuthMatch,
-    allEndpoints.reserve,
+    allEndpoints.manager,
+    allEndpoints.fan
 ];
 
 module.exports = managerPolicies;

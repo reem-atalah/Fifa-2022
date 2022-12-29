@@ -4,7 +4,7 @@ const allEndpoints=require('./endpoints');
 var db = require('../db');
 
 // delete user by admin only
-router.delete('/:Username', isAuthorized(allEndpoints.AuthUser),
+router.delete('/:Username', isAuthorized(allEndpoints.admin),
  async (req, res) => {
 
     var username = req.params.Username;

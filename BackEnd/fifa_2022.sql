@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS Stadiums
 (
     ID int not null auto_increment,
     primary key (ID),
-    Name varchar(50) not null,
+    Name varchar(50) not null unique,
     NumRows int not null,
     NumSeatsPerRow int not null
 );

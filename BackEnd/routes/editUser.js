@@ -4,7 +4,7 @@ const allEndpoints=require('./endpoints');
 var db = require('../db');
 
 
-router.put('/:Username', isAuthorized(allEndpoints.userProfile),async (req, res) => {
+router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
 
     var firstname= req.body.FirstName ;
     var lastname= req.body.LastName ;
