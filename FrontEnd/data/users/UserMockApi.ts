@@ -3,7 +3,17 @@ import axios from "axios";
 type Props = {
 	Username: string;
 };
-
+export async function getUser({username}:any,headers: any) {
+	return axios
+		.get(`http://localhost:8080/users/${username}`, { headers })
+		.then((res) => {
+			return res.data;
+		})
+		.catch((err) => {
+			console.log(err);
+			return false;
+		});
+}
 export async function getAllUsers(headers: any) {
 	return axios
 		.get("http://localhost:8080/users", { headers })

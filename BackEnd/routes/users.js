@@ -40,7 +40,7 @@ router.get("/:username", isAuthorized(allEndpoints.fan), async (req, res) => {
 			});
 		}
 		// console.log(executed1);
-		return res.status(200).json(executed1);
+		return res.status(200).json(executed1[0]);
 	} catch (e) {
 		console.log(e);
 		return res.status(404).send(e);
