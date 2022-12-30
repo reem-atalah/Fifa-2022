@@ -12,7 +12,7 @@
     @apply w-fit ml-auto block p-2;
 }
 .match-card__header {
-    @apply p-5 flex flex-col items-center border-b-4;
+    @apply p-5 flex flex-col items-center border-b-4 w-full;
 }
 .teams-wrapper {
 	@apply flex flex-wrap justify-between items-center w-full text-xl;
@@ -21,6 +21,7 @@
     @apply text-sm text-center text-slate-500;
 }
 .match-card__content {
+    @apply w-full;
 }
 
 .match-card__content-item {

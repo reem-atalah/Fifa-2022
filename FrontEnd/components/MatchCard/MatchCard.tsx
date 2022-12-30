@@ -4,12 +4,20 @@ import { GiWhistle } from "react-icons/gi";
 import { TbRectangleVertical } from "react-icons/tb";
 import { MdPlace, MdEdit } from "react-icons/md";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const CardWrapper = ({ asLink, href, children, className }: any) => {
+	const router = useRouter();
 	return asLink ? (
-		<Link href={href} className={className}>
+		<button
+			className={className}
+			onClick={(e) => {
+				router.push(href);
+			}}
+			style={{ cursor: "pointer" }}
+		>
 			{children}
-		</Link>
+		</button>
 	) : (
 		<div className={className}>{children}</div>
 	);

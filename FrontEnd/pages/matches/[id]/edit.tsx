@@ -71,12 +71,7 @@ export async function getServerSideProps(context: any) {
 		const stadium = stadiums.find((stadium: any) => stadium.Name === Stadium);
 		if (!team1 || !team2 || !stadium) {
 			// invalid match details
-			return {
-				redirect: {
-					permanent: false,
-					destination: "/matches",
-				},
-			};
+			return null;
 		}
 
 		return {
@@ -92,5 +87,13 @@ export async function getServerSideProps(context: any) {
 		};
 	})(context.query);
 
+	if (!match) {
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/matches",
+			},
+		};
+	}
 	return { props: { teams, stadiums, ...match } };
 }
