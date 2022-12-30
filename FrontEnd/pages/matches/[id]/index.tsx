@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Header from "../../../components/Header/Header";
 import styles from "./index.module.css";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { getMatch } from "../../../data/matches/MatchesMockApi";
 import MatchCard from "../../../components/MatchCard/MatchCard";
 import StadiumComponent from "../../../components/StadiumComponent/StadiumComponent";
@@ -30,6 +30,7 @@ const MatchComponent = ({ match, showControl }: any) => {
 						Name: match.match.Stadium,
 						userSeats: match.match.UserList,
 						reservedSeats: match.match.OtherList,
+						matchID: match.match.ID,
 					}}
 				/>
 			</div>
