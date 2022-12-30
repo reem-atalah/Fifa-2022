@@ -2,7 +2,7 @@ interface errors {
 	[key: string]: any;
 }
 
-export default function validateSignup(values: any) {
+export default function validateEditInfo(values: any) {
 	const errors: errors = {};
 	// validate email
 	if (!values.email) {
@@ -50,6 +50,7 @@ export default function validateSignup(values: any) {
 	if (!values.birthDate) {
 		errors.birthDate = "Required";
 	}
+    values.birthDate = new Date(values.birthDate).toISOString().slice(0, 10);
 
 	// validate gender
 	if (!values.gender) {

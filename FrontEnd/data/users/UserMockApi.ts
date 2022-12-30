@@ -59,3 +59,31 @@ export async function changeUserRole(
 			return false;
 		});
 }
+
+
+export async function editUserInfo(values: any, token) {
+	return axios
+		.put(`http://localhost:8080/editUser/${values.username}`, {
+			FirstName: values.firstName,
+			LastName: values.lastName,
+			Email: values.email,
+			Password: values.password, 
+			Username: values.username,
+			Birthdate: values.birthDate,
+			Gender: values.gender,
+			Nationality: values.nationality,
+			Role: values.role,
+		},{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
+		.then((res) => {
+			console.log(res);
+			return { success: true, error: "" };
+		})
+		.catch((err) => {
+			console.log(err);
+			return { success: false, error: err };
+		});
+}

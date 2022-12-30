@@ -5,7 +5,6 @@ var db = require('../db');
 
 
 router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
-
     var firstname= req.body.FirstName ;
     var lastname= req.body.LastName ;
     var oldUsername= req.params.Username;
@@ -18,9 +17,8 @@ router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
     var role = req.body.Role;
 
     // get the user, then update it once
-    query= "SELECT * FROM Users where Username ='"+oldUsername+"'";
+    query= `SELECT * FROM Users where Username ='${oldUsername}'`;
     sql =await applyQuery(query);
-
     // if user doesn't exist
     if(!sql)
     {
@@ -43,9 +41,9 @@ router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
  
     if(email)
     {
-      let email_sql = `select * from Users where Email = "${email}" and Username != ${oldUsername}`;
+      let email_sql = `select * from Users where Email = "${email}" and Username != '${oldUsername}'`;
       let executed = await applyQuery(email_sql);
-      console.log(executed)
+
       if(executed.length != 0)
       {
         return res.json("This email is already in use")
@@ -55,9 +53,9 @@ router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
     // // update password and hash it
 
     // update username at the end , then update the token 
-    if(newUsername)
+    if(newUsername != oldUsername)
     {
-      let username_sql = `select * from Users where Username = "${oldUsername}"`;
+      let username_sql = `select * from Users where Username = "${newUsername}"`;
       let executed = await applyQuery(username_sql);
       if(executed.length != 0)
       {
