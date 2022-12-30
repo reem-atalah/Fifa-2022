@@ -9,7 +9,7 @@ let db = require("../db");
 // Get all matches
 router.get("/", async (req, res) => {
 	let sql_query = `
-  SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, t1.Name as Team1Name, t2.Name as Team2Name
+  SELECT m.ID, m.Time, m.Referee, m.Linesman1, m.Linesman2, s.Name as Stadium, t1.Name as Team1Name, t2.Name as Team2Name, t1.picture as Team1Picture, t2.picture as Team2Picture
   FROM Matches as m 
   left join Stadiums as s on m.StadiumID = s.ID
   left join Teams as t1 on m.Team1 = t1.ID

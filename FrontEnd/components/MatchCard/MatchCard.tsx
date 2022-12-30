@@ -5,6 +5,7 @@ import { TbRectangleVertical } from "react-icons/tb";
 import { MdPlace, MdEdit } from "react-icons/md";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import SVGParser from "../SVGParser";
 
 const CardWrapper = ({ asLink, href, children, className }: any) => {
 	const router = useRouter();
@@ -41,12 +42,15 @@ const MatchCard = ({ match, asLink, showControl, className }: any) => {
 			<div className={styles["match-card__header"]}>
 				<div className={styles["teams-wrapper"]}>
 					<div className={styles["match-card__team"]}>
-						<div className={styles["match-card__team-flag"]}></div>
+						{/* <div className={styles["match-card__team-flag"]}></div> */}
+						<SVGParser image={match.Team1Picture} />
 						<p className={styles["match-card__team-name"]}>{match.Team1Name}</p>
 					</div>
 					vs
 					<div className={styles["match-card__team"]}>
-						<div className={styles["match-card__team-flag"]}></div>
+						{/* <div className={styles["match-card__team-flag"]}></div> */}
+						<SVGParser image={match.Team2Picture} />
+
 						<p className={styles["match-card__team-name"]}>{match.Team2Name}</p>
 					</div>
 				</div>
