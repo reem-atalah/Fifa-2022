@@ -2,6 +2,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { Role } from "../../types";
 const AuthStatusComponent = () => {
 	const session = useSession();
 	if (session.status === "loading") return <div>Loading...</div>;
@@ -36,6 +37,9 @@ const AuthStatusComponent = () => {
 	);
 };
 export default function Header() {
+	const session = useSession();
+	const isAdmin = session?.data?.user?.role == Role.Admin;
+
 	return (
 		<header className="relative bg-red-700 border-b-8 border-b-[rgb(30,0,0)]">
 			<div className="absolute inset-0 blur-sm z-[-1]"></div>
@@ -53,6 +57,11 @@ export default function Header() {
 					<li className="text-lg font-bold text-white">
 						<Link href="/">Get Your Ticket</Link>
 					</li>
+					{isAdmin && (
+						<li className="text-lg font-bold text-white">
+							<Link href="/users">Users</Link>
+						</li>
+					)}
 				</ul>
 				<div className="flex flex-row gap-3">
 					<AuthStatusComponent />
