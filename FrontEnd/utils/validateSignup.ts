@@ -2,7 +2,7 @@ interface errors {
 	[key: string]: any;
 }
 
-export default function validateSignup(values: any) {
+export default function 	validateSignup(values: any) {
 	const errors: errors = {};
 	// validate email
 	if (!values.email) {

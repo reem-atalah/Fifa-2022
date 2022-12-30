@@ -24,7 +24,6 @@ router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
     {
       return res.status(200).json("User doesn't exist");
     }
-
     // check for role
     if(!role)
     {
@@ -99,6 +98,7 @@ router.put('/:Username', isAuthorized(allEndpoints.fan),async (req, res) => {
     sql_query = sql_query.slice(0, -2);
     sql_query += ` WHERE UserName ="${oldUsername}";`;
   }
+  console.log(sql_query);
     let excute_update = await applyQuery(sql_query);
     if(newUsername)
     {
