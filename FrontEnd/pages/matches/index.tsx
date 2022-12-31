@@ -14,6 +14,7 @@ type Props = {
 };
 
 export default function Matches({ matches, showControl }: Props) {
+	
 	return (
 		<>
 			<Head>
@@ -23,7 +24,7 @@ export default function Matches({ matches, showControl }: Props) {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<Header />
-			<h1 className="text-center">Matches </h1>
+			<h1 className="text-center  text-3xl font-bold">Matches </h1>
 			{showControl && (
 				<Link href="/matches/new" className="block p-2 border-2 w-fit ml-auto">
 					Create New

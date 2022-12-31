@@ -52,7 +52,7 @@ export default function Header() {
 						<Link href="/matches">Matches</Link>
 					</li>
 					<li className="text-lg font-bold text-white">
-						<Link href="/matches">Stadiums</Link>
+						<Link href="/stadiums">Stadiums</Link>
 					</li>
 					<li className="text-lg font-bold text-white">
 						<Link href="/">Get Your Ticket</Link>

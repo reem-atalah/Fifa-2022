@@ -36,6 +36,22 @@ router.post('/', isAuthorized(allEndpoints.manager), async (req, res) => {
   return res.status(200).json({ msg: "Stadium created successfully" });
 });
 
+router.put('/:StadiumID', isAuthorized(allEndpoints.manager), async (req, res) => {
+  //
+  let name = req.body.Name;
+  let numRows = req.body.NumRows;
+  let numSeatsPerRow = req.body.NumSeatsPerRow;
+  let id = req.params.StadiumID;
+
+
+  // select name
+  let sql_select_name = `update stadiums set Name = '${name}', NumRows = ${numRows}, NumSeatsPerRow = ${numSeatsPerRow} where ID = ${id}`;
+  let executed = await applyQuery(sql_select_name);
+  if (executed) {
+    return res.status(200).json({ msg: "Stadium Updates Successfully" });
+  }
+});
+
 const applyQuery = (query) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
