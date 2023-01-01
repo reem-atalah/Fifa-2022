@@ -31,6 +31,7 @@ const MatchComponent = ({ match, showControl }: any) => {
 						userSeats: match.match.UserList,
 						reservedSeats: match.match.OtherList,
 						matchID: match.match.ID,
+						matchTime:match.match.Time
 					}}
 				/>
 			</div>

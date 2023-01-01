@@ -7,6 +7,7 @@ const StadiumComponent = ({ stadium }: any) => {
 	const { data: session } = useSession();
 	const matchID = stadium.matchID
 	const handleClick = async (seatNum: any, reservedState: any, setReservedState: any) => {
+		if(new Date(stadium.matchTime) < new Date()) return alert("Match has already started")
 		if (reservedState == 0) {//seat is not reserved
 			const {success,err}:any = await reserveSeat({ matchID,seatNum }, { Authorization: `Bearer ${session?.user?.token}` });
 			if (success) setReservedState(1);

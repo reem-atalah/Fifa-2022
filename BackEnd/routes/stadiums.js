@@ -24,16 +24,16 @@ router.post('/', isAuthorized(allEndpoints.manager), async (req, res) => {
     return res.status(400).json({ msg: "Missing required fields" });
   }
 
-  // Num rows 5 - 50
-  if (parseInt(numRows) < 5 || parseInt(numRows) > 50)
-  {
-    return res.status(400).json({msg: "rows invalid"})
-  }
+  // // Num rows 5 - 50
+  // if (parseInt(numRows) < 5 || parseInt(numRows) > 50)
+  // {
+  //   return res.status(400).json({msg: "rows invalid"})
+  // }
 
-  if (parseInt(numSeatsPerRow) < 5 || parseInt(numSeatsPerRow) > 50)
-  {
-    return res.status(400).json({msg: "num seats invalid"})
-  }
+  // if (parseInt(numSeatsPerRow) < 5 || parseInt(numSeatsPerRow) > 50)
+  // {
+  //   return res.status(400).json({msg: "num seats invalid"})
+  // }
   
 
   // select name
