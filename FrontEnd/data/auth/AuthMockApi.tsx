@@ -45,6 +45,6 @@ export async function register(values: any) {
 		})
 		.catch((err) => {
 			console.log(err);
-			return { success: false, error: err };
+			return { success: false, responseErr: err.response.data };
 		});
 }

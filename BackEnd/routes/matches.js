@@ -123,6 +123,14 @@ router.post('/', isAuthorized(allEndpoints.manager),
       return res.status(500).json({ msg: 'Stadium has conflicting matches' });
     }
 
+    // date should be in the future 
+    //check if Time is in the future 
+    const now = new Date();
+    console.log(Time, now);
+    if (new Date(Time) < now) {
+      return res.status(500).json({ msg: 'Time should be in the future' });
+    }
+
     // Insert new match
     let sql_query = `INSERT INTO Matches (StadiumID, Time, Team1, Team2, Referee, Linesman1, Linesman2)
           VALUES ("${StadiumID}", "${Time}", "${Team1}", "${Team2}", "${Referee}", "${Linesman1}", "${Linesman2}");`
@@ -259,6 +267,12 @@ match, have conflicting matches with the new time'});
       }
     }
 
+    const now = new Date();
+    console.log(Time, now);
+    if (new Date(Time) < now) {
+      return res.status(500).json({ msg: 'Time should be in the future' });
+    }
+    
     //
     try {
       let executed = await applyQuery(sql_query);

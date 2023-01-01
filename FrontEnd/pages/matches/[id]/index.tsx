@@ -17,7 +17,7 @@ const MatchComponent = ({ match, showControl }: any) => {
 			</Head>
 			<Header />
 
-			<div>
+			<div className="">
 				<MatchCard
 					asLink={false}
 					match={match.match}
