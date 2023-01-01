@@ -7,11 +7,11 @@ export async function reserveSeat({matchID,seatNum}:any,headers: any) {
 	return axios
 		.post(`http://localhost:8080/matches/${matchID}/seats`, {seats},{ headers })
 		.then((res) => {
-			return res.data;
+			return {success: true, data:res.data};
 		})
 		.catch((err) => {
 			console.log(err);
-			return false;
+			return {success: false, data:err.response.data};
 		});
 }
 
@@ -23,10 +23,10 @@ export async function cancelReservation({matchID,seatNum}:any,headers: any) {
 			headers
 		})
 		.then((res) => {
-			return res.data;
+			return {success: true, err:res.data};
 		})
 		.catch((err) => {
 			console.log(err);
-			return false;
+			return {success: false, err:err.response.data.msg};
 		});
 }

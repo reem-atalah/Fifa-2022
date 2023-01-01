@@ -8,11 +8,14 @@ const StadiumComponent = ({ stadium }: any) => {
 	const matchID = stadium.matchID
 	const handleClick = async (seatNum: any, reservedState: any, setReservedState: any) => {
 		if (reservedState == 0) {//seat is not reserved
-			const success = await reserveSeat({ matchID,seatNum }, { Authorization: `Bearer ${session?.user?.token}` });
+			const {success,err}:any = await reserveSeat({ matchID,seatNum }, { Authorization: `Bearer ${session?.user?.token}` });
 			if (success) setReservedState(1);
+			else  alert(err);
 		} else if (reservedState == 1) {
-			const success = await cancelReservation({ matchID,seatNum }, { Authorization: `Bearer ${session?.user?.token}` });
+			const  {success,err}:any = await cancelReservation({ matchID,seatNum }, { Authorization: `Bearer ${session?.user?.token}` });
+			console.log(err)
 			if (success) setReservedState(0);
+			else  alert(err);
 		}
 	};
 	

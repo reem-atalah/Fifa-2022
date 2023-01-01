@@ -462,12 +462,27 @@ router.delete("/:id/seats/", isAuthorized(allEndpoints.fan), async (req, res) =>
 		return res.status(400).json({msg: "Not all requested seats are reserved by this user"});
   }
 
+  let sql_query_match = `SELECT * FROM Matches WHERE Id = "${mid}";`;
+  let executed_match = await applyQuery(sql_query_match);
+  const match_Date = new Date(executed_match[0].Time);
+
+  const now = new Date();
+  const diff = match_Date - now;
+  const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  console.log(diffDays)
+  if (diffDays < 3) {
+    return res.status(400).json({msg: "You can't cancel your reservation less than 3 days before the match"});
+
   // Cancel Reservations
 	for (let i = 0; i < seats.length; i++) {
 		let seatNo = seats[i];
 		let sql_query = `DELETE FROM Reserve WHERE UserID = "${uid}" AND MatchID = "${mid}" AND SeatNo = "${seatNo}";`;
 		let executed = await applyQuery(sql_query);
 	}
+
+  }
+
+
 
 	return res.status(200).json({ res: "Reservations cancelled successfully" });
 });
