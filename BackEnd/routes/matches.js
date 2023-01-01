@@ -114,13 +114,31 @@ router.post('/', isAuthorized(allEndpoints.manager),
     }
 
     // check refree isn't busy
-    // let mysqq = `SELECT Time from Matches Where Referee = "${Referee}";`
-    // let exec = applyQuery(mysqq);
-    // if (await CheckConflictingTimes(exec, new Date(Time), 120)) {
-    //   console.log('TTTTTTTTTTTT')
-    //   return res.status(500).json({ msg: 'refree has conflicting matches' });
-    // }
+    let mysqq = `SELECT Time from Matches Where Referee = "${Referee}"
+    OR Linesman1 = "${Referee}"
+    OR Linesman2 = "${Referee}";`
+    let exec = await applyQuery(mysqq);
+    if (await CheckConflictingTimes(exec, new Date(Time), 120)) {
+      return res.status(500).json({ msg: 'refree has conflicting matches' });
+    }
 
+    // check Linesman1 isn't busy
+    mysqq = `SELECT Time from Matches Where Referee = "${Linesman1}"
+    OR Linesman1 = "${Linesman1}"
+    OR Linesman2 = "${Linesman1}";`
+    exec = await applyQuery(mysqq);
+    if (await CheckConflictingTimes(exec, new Date(Time), 120)) {
+      return res.status(500).json({ msg: 'Linesman1 has conflicting matches' });
+    }
+
+    // check Linesman2 isn't busy
+    mysqq = `SELECT Time from Matches Where Referee = "${Linesman2}"
+    OR Linesman1 = "${Linesman2}"
+    OR Linesman2 = "${Linesman2}";`
+    exec = await applyQuery(mysqq);
+    if (await CheckConflictingTimes(exec, new Date(Time), 120)) {
+      return res.status(500).json({ msg: 'Linesman2 has conflicting matches' });
+    }
 
     // Teams Have conflicting matches
     if (await CheckConflictingMatchesTeams(Team1, Team2, Time)) {
