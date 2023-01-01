@@ -113,6 +113,15 @@ router.post('/', isAuthorized(allEndpoints.manager),
       }
     }
 
+    // check refree isn't busy
+    // let mysqq = `SELECT Time from Matches Where Referee = "${Referee}";`
+    // let exec = applyQuery(mysqq);
+    // if (await CheckConflictingTimes(exec, new Date(Time), 120)) {
+    //   console.log('TTTTTTTTTTTT')
+    //   return res.status(500).json({ msg: 'refree has conflicting matches' });
+    // }
+
+
     // Teams Have conflicting matches
     if (await CheckConflictingMatchesTeams(Team1, Team2, Time)) {
       return res.status(500).json({ msg: 'Teams have conflicting matches' });
@@ -126,7 +135,7 @@ router.post('/', isAuthorized(allEndpoints.manager),
     // date should be in the future 
     //check if Time is in the future 
     const now = new Date();
-    console.log(Time, now);
+    // console.log(Time, now);
     if (new Date(Time) < now) {
       return res.status(500).json({ msg: 'Time should be in the future' });
     }
@@ -527,6 +536,7 @@ const CheckConflictingTimes = async (ex, t2, minutes) => {
       // console.log(t2);
       // console.log(diff);
       if (diff < minutes) {
+        // console.log('tttt');
         return true;
       }
     }
