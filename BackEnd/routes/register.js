@@ -46,6 +46,11 @@ router.post("/", async (req, res) => {
 		Role = 3;
 	}
 
+	const now = new Date();
+	//check if birthday is 13 years ago
+	if (now.getFullYear() - (new Date(Birthdate)).getFullYear() < 13) {
+		return res.status(401).json("You must be at least 13 years old");
+	}
 	// Role: 0 -> Website Admin -> PROHIBTED
 	// Role: 1 -> Manager -> Chaneged to 2
 	// Role: 2 -> Fan who wants management -> allowed

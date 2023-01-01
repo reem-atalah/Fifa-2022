@@ -11,11 +11,13 @@ const SignupComponent = () => {
 	const [error, setError] = useState("");
 
 	const handleSubmit = async (values: any) => {
-		const { success, responseErr }: any = await register(values);
-		if (success) {
+		const res: any = await register(values);
+		console.log(res);
+		if (res.success) {
 			router.push("/signin");
 		} else {
-			setError(responseErr);
+			console.log(res.responseErr)
+			setError(res.responseErr);
 		}
 	};
 
@@ -107,6 +109,7 @@ const SignupComponent = () => {
 				<button type="submit" className="form--submit">
 					Sign Up
 				</button>
+				<p className="text-red-700 ">{error}</p>
 			</Form>
 		</Formik>
 	);
