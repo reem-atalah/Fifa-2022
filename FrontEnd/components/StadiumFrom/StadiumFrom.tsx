@@ -46,9 +46,9 @@ const StadiumForm = ({ stadiums, createNew, initialValues }: any) => {
 		<Formik
 			enableReinitialize
 			initialValues={{
-				Name: `${initialValues?.Name}}`,
-				NumRows: `${initialValues?.NumRows}}`,
-				NumSeatsPerRow: `${initialValues?.NumSeatsPerRow}}`,
+				Name: `${initialValues?.Name}`,
+				NumRows: `${initialValues?.NumRows}`,
+				NumSeatsPerRow: `${initialValues?.NumSeatsPerRow}`,
 			}}
 			onSubmit={handleSubmit}
 			validate={(values) =>

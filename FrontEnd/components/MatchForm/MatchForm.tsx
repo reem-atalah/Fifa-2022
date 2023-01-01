@@ -37,7 +37,7 @@ const MatchForm = ({ teams, stadiums, createNew, initialValues }: Props) => {
 				})
 				.catch((err) => {
 					console.log(err);
-					setError("Something went wrong");
+					setError(err.response.data.msg);
 				});
 		} else {
 			updateMatch(params, headers)
@@ -46,7 +46,7 @@ const MatchForm = ({ teams, stadiums, createNew, initialValues }: Props) => {
 				})
 				.catch((err) => {
 					console.log(err);
-					setError("Something went wrong");
+					setError(err.response.data.msg);
 				});
 			// }
 		}
@@ -116,7 +116,7 @@ const MatchForm = ({ teams, stadiums, createNew, initialValues }: Props) => {
 					type="time"
 					className={styles["matches_form__small-field"]}
 				/>
-
+				<p className="text-red-500">{error}</p>
 				<button type="submit" className="form--submit">
 					Submit
 				</button>

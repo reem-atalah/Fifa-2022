@@ -26,7 +26,7 @@ export default function Matches({ matches, showControl }: Props) {
 			<Header />
 			<h1 className="text-center  text-3xl font-bold">Matches </h1>
 			{showControl && (
-				<Link href="/matches/new" className="block p-2 border-2 w-fit ml-auto">
+				<Link href="/matches/new" className="block p-2 border-4 bg-gray-500 w-fit text-2xl font-bold text-white hover:text-gray-100 hover:bg-gray-900">
 					Create New
 				</Link>
 			)}

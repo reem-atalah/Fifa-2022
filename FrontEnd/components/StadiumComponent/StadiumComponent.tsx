@@ -17,14 +17,14 @@ const StadiumComponent = ({ stadium }: any) => {
 	};
 	
 	const style = {
-		gridTemplateColumns: `repeat(${20},minmax(max-content, 1fr))`,
+		gridTemplateColumns: `repeat(${stadium.NumSeatsPerRow},minmax(max-content, 1fr))`
 	};
 	return (
-		<div className="p-2">
+		<div className="">
 			<h1 className="text-center mb-2">
 				Stadium:<span className="text-slate-700"> {stadium.Name}</span>
 			</h1>
-			<div className={`grid overflow-auto gap-1`} style={style}>
+			<div className={`grid overflow-auto gap-1 `} style={style}>
 				{Array.from(
 					Array(stadium.Number_Rows * stadium.NumSeatsPerRow),
 					(_, index) => index + 1
